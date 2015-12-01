@@ -1,0 +1,27 @@
+{
+  "name": "dragon-drop",
+  "version": "0.0.0",
+  "description": "Drag and/or drop",
+  "main": "dragon-drop.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/schne324/dragon-drop.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/schne324/dragon-drop/issues"
+  },
+  "homepage": "https://github.com/schne324/dragon-drop#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-jade": "^1.1.0",
+    "gulp-stylus": "^2.1.0",
+    "jade": "^1.11.0",
+    "path": "^0.12.7",
+    "stylus": "^0.52.4"
+  }
+}

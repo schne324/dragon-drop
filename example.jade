@@ -1,0 +1,34 @@
+doctype html
+html(lang='en')
+	head
+		title Dragon Drop
+		link(rel="stylesheet" href="styles.css")
+		link(rel="stylesheet" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css")
+		link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata")
+	body
+		h1 Dragon Drop
+		ul.dragon-drop
+			li
+				button(type='button' class='dragon ion ion-ios-drag' id='button-1' aria-labelledby='button-1 item-1')
+					.offscreen Reorder
+				span#item-1 Item 1
+			li
+				button(type='button' class='dragon ion ion-ios-drag' id='button-2' aria-labelledby='button-2 item-2')
+					.offscreen Reorder
+				span#item-2 Item 2
+			li
+				button(type='button' class='dragon ion ion-ios-drag' id='button-3' aria-labelledby='button-3 item-3')
+					.offscreen Reorder
+				span#item-3 Item 3
+			li
+				button(type='button' class='dragon ion ion-ios-drag' id='button-4' aria-labelledby='button-4 item-4')
+					.offscreen Reorder
+				span#item-4 Item 4
+			li
+				button(type='button' class='dragon ion ion-ios-drag' id='button-5' aria-labelledby='button-5 item-5')
+					.offscreen Reorder
+				span#item-5 Item 5
+		script(src='http://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.js')
+		script(src='dragon-drop.js')
+		script.
+			$('.dragon-drop').dragonDrop();

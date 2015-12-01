@@ -1,0 +1,44 @@
+body
+	font-family 'Armata', sans-serif
+
+h1
+	font-size 50px
+	text-align center
+	
+.offscreen
+	position absolute
+	width 1px
+	height 1px
+	overflow hidden
+	clip rect(1px 1px 1px 1px)
+	clip rect(1px, 1px, 1px, 1px)
+
+.dragon-drop
+	margin 25px auto
+	width 80%
+	max-width 600px
+	min-width 250px
+	padding 0
+
+	li
+		list-style-type none
+		font-size 25px
+		margin 10px
+		border 1px solid
+		border-radius 10px
+		padding 5px
+		
+		span
+			display inline-block
+			vertical-align middle
+			margin-left 30px
+
+		.dragon
+			display inline-block
+			vertical-align middle
+			border 0
+			background transparent
+			font-size 40px
+			
+			&.drag-on
+				box-shadow inset 1px 1px 5px
