@@ -1,0 +1,19 @@
+{
+  "name": "dragon-drop",
+  "main": "dragon-drop.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/schne324/dragon-drop",
+  "authors": [
+    "Harris Schneiderman <harris.schneiderman@deque.com>"
+  ],
+  "description": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

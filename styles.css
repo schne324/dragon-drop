@@ -43,3 +43,7 @@ h1 {
 .dragon-drop li .dragon.drag-on {
   box-shadow: inset 1px 1px 5px;
 }
+.dragon-drop li .dragon.drag {
+  z-index: 99;
+  color: #f00;
+}
