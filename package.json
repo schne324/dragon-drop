@@ -19,9 +19,9 @@
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-jade": "^1.1.0",
-    "gulp-stylus": "^2.1.0",
+    "gulp-stylus": "^2.1.1",
     "jade": "^1.11.0",
     "path": "^0.12.7",
-    "stylus": "^0.52.4"
+    "stylus": "^0.53.0"
   }
 }

@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><title>Dragon Drop</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Armata"></head><body><h1>Dragon Drop</h1><p id="dragon-assistant">Activate the reorder button and use the arrow keys to reorder the list.</p><ul class="dragon-drop"><li><button type="button" id="button-1" aria-labelledby="button-1 item-1" aria-describedby="dragon-assistant" class="dragon ion ion-ios-drag"><div class="offscreen">Reorder</div></button><span id="item-1">Item 1</span></li><li><button type="button" id="button-2" aria-labelledby="button-2 item-2" aria-describedby="dragon-assistant" class="dragon ion ion-ios-drag"><div class="offscreen">Reorder</div></button><span id="item-2">Item 2</span></li><li><button type="button" id="button-3" aria-labelledby="button-3 item-3" aria-describedby="dragon-assistant" class="dragon ion ion-ios-drag"><div class="offscreen">Reorder</div></button><span id="item-3">Item 3</span></li><li><button type="button" id="button-4" aria-labelledby="button-4 item-4" aria-describedby="dragon-assistant" class="dragon ion ion-ios-drag"><div class="offscreen">Reorder</div></button><span id="item-4">Item 4</span></li><li><button type="button" id="button-5" aria-labelledby="button-5 item-5" aria-describedby="dragon-assistant" class="dragon ion ion-ios-drag"><div class="offscreen">Reorder</div></button><span id="item-5">Item 5</span></li></ul><div id="pa-system" role="log" aria-live="polite" aria-relevant="additions" aria-atomic="false" class="offscreen"></div><script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.js"></script><script src="../bower_components/jquery-ui-sortable-min/jquery-ui-sortable-min.js"></script><script src="../dragon-drop.js"></script><script>$('.dragon-drop').dragonDrop({
+	inactiveClass: 'dragon-target',
+	onChange: function (item) {
+		// tell AT that the order has changed
+		var $item = $(item);
+		var $items = $('.dragon-drop li');
+		var index = $.inArray(item, $items) + 1;
+		var $p = $('<p />');
+		$p.text(
+			'The list has been reordered. ' +
+			$item.find('span').text() +
+			' is now item ' + index +
+			' of ' + $items.length
+		);
+
+		$('#pa-system').append($p);
+	}
+})
+.find('button').on('click', function () {
+	var $button = $(this);
+	var txt = $button.next().text();
+	setTimeout(function () {
+		if ($button.is('[aria-grabbed="true"]')) {
+			$('#pa-system').append($('<p />').text(txt + ' grabbed. '))
+		} else {
+			$('#pa-system').append($('<p />').text(txt + ' dropped. '))
+		}
+	}, 0);
+});</script></body></html>

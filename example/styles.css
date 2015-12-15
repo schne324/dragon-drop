@@ -5,6 +5,9 @@ h1 {
   font-size: 50px;
   text-align: center;
 }
+p {
+  text-align: center;
+}
 .offscreen {
   position: absolute;
   width: 1px;
@@ -27,6 +30,14 @@ h1 {
   border: 1px solid;
   border-radius: 10px;
   padding: 5px;
+  background-color: #fff;
+  cursor: ns-resize;
+}
+.dragon-drop li.dragon-placeholder {
+  background-color: #ccc;
+}
+.dragon-drop li.dragon-target {
+  border-style: dashed;
 }
 .dragon-drop li span {
   display: inline-block;
