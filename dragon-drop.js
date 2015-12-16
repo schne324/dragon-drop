@@ -27,17 +27,17 @@
       forcePlaceholderSize: true
     };
 
-    if (options.onChange) {
-      mouseOpts.stop = function (_, ui) {
-        options.onChange(ui.item[0]);
-      };
-    }
-
-    this.sortable(mouseOpts);
-
     return this.each(function () {
       var $items, $dragItems;
       var $container = $(this);
+
+      if (options.onChange) {
+        mouseOpts.stop = function (_, ui) {
+          options.onChange(ui.item, $container.find(options.itemSelector));
+        };
+      }
+
+      $container.sortable(mouseOpts);
 
       // update refs after mouse drag changes dom
       $container.on('sortupdate', updateItems);
@@ -164,7 +164,7 @@
         updateItems(); // re-index the stuffs
 
         if (options.onChange) {
-          options.onChange($oldItem[0]);
+          options.onChange($oldItem, $items);
         }
       }
 
