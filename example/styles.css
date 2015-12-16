@@ -39,6 +39,9 @@ p {
 .dragon-drop li.dragon-target {
   border-style: dashed;
 }
+.dragon-drop li.drag-on .dragon {
+  box-shadow: inset 1px 1px 5px;
+}
 .dragon-drop li span {
   display: inline-block;
   vertical-align: middle;
@@ -50,9 +53,6 @@ p {
   border: 0;
   background: transparent;
   font-size: 40px;
-}
-.dragon-drop li .dragon.drag-on {
-  box-shadow: inset 1px 1px 5px;
 }
 .dragon-drop li .dragon.drag {
   z-index: 99;

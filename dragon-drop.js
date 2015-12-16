@@ -42,20 +42,36 @@
       // update refs after mouse drag changes dom
       $container.on('sortupdate', updateItems);
 
-      updateItems();
+      setup();
 
-      $dragItems
-        .data('drag-on', false)
-        .prop('tabIndex', 0)
-        .attr({
-          'role': 'button',
-          'aria-grabbed': 'false',
-          'aria-dropeffect': 'move'
-        })
-        .off('keydown', onDraggableKeydown)
-        .on('keydown', onDraggableKeydown)
-        .off('click', onDraggableClick)
-        .on('click', onDraggableClick);
+      function setup() {
+        updateItems();
+
+        $dragItems
+          .each(function (_, dragItem) {
+            var $dragItem = $(dragItem);
+
+            $dragItem
+              .data('drag-on', false)
+              .prop('tabIndex', 0)
+              .attr({
+                'role': 'button',
+                'aria-grabbed': false,
+                'aria-dropeffect': 'move'
+              })
+              .off('keydown.dragon')
+              .on('keydown.dragon', onDraggableKeydown)
+              .off('click.dragon')
+              .on('click.dragon', onDraggableClick);
+          });
+
+        if (options.activeClass) {
+          $items.removeClass(options.activeClass);
+        }
+        if (options.inactiveClass) {
+          $items.removeClass(options.inactiveClass);
+        }
+      }
 
       function updateItems() {
         $items = $container.find(options.itemSelector);
@@ -67,13 +83,15 @@
       function onDraggableClick() {
         updateItems();
         var $item = $(this);
+        var itemIndex = $.inArray(this, $dragItems);
+        var $listItem = $items.eq(itemIndex);
         var isDragging = $item.data('drag-on');
 
         // toggle stuff
         $item.data('drag-on', !isDragging);
 
         if (options.activeClass) {
-          $item.toggleClass(options.activeClass);
+          $listItem.toggleClass(options.activeClass);
         }
 
         if (options.inactiveClass) {
@@ -143,7 +161,7 @@
 
         old.focus();
 
-        updateItems(); // re-index stuffzz
+        updateItems(); // re-index the stuffs
 
         if (options.onChange) {
           options.onChange($oldItem[0]);
