@@ -1,7 +1,7 @@
 {
   "name": "drag-on-drop",
   "main": "dragon-drop.js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "homepage": "https://github.com/schne324/dragon-drop",
   "authors": [
     "Harris Schneiderman <harris.schneiderman@deque.com>"

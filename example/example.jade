@@ -72,8 +72,6 @@ html(lang='en')
 			$('.dragon-drop').dragonDrop({
 				inactiveClass: 'dragon-target',
 				onChange: function ($item, $items) {
-					console.log($item);
-					console.log($items);
 					// tell AT that the order has changed
 					var index = $.inArray($item[0], $items) + 1;
 					var $p = $('<p />');

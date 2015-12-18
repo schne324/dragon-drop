@@ -33,7 +33,7 @@
 
       if (options.onChange) {
         mouseOpts.stop = function (_, ui) {
-          options.onChange(ui.item, $container.find(options.itemSelector));
+          options.onChange.call(this, ui.item, $container.find(options.itemSelector));
         };
       }
 
@@ -164,7 +164,7 @@
         updateItems(); // re-index the stuffs
 
         if (options.onChange) {
-          options.onChange($oldItem, $items);
+          options.onChange.call($container[0], $oldItem, $items);
         }
       }
 
