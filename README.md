@@ -53,3 +53,7 @@ $('.reorder-list').dragonDrop({
 	}
 });
 ```
+
+## Custom Examples
+If you'd like to make custom examples, you can edit the `example/example.jade` and the `example/styles.styl` files and run `gulp` to build the changes.
+(`gulp watch` is available to prevent you from executing `gulp` after each and every change)
