@@ -8,19 +8,19 @@
     dragSelector:  '.dragon', // qualified within `itemSelector` (optional, if not provided itemSelector will be used as dragSelector)
     activeClass: 'drag-on',
     inactiveClass: null,
-    onChange: null
+    onChange: null,
+    mouseDrag: null, // ANY jquery ui sortable options the user wishes to pass through
+    announcement: { // these are all given 3 arguments in this exact order: the item's text, its index, and the total length of items
+      textSelector: null, // if not provided, will default to the text of the given item
+      grab: '%s grabbed.',
+      drop: '%s dropped.',
+      reorder: 'The list has been reordered. %s is now item %s of %s'
+    }
   };
-
-  //             TODO
-  // -----------------------------------
-  // 1) Add `mouseDrag` options object:
-  // mouseDrag: {
-  //   key: 'Any options user wishes to pass directly to `sortable`'
-  // }
 
   $.fn.dragonDrop = function (userOpts) {
     var options = $.extend(options, defaults, userOpts);
-    var mouseOpts = {
+    var mouseOpts = options.mouseDrag || {
       placeholder: 'dragon-placeholder',
       items: options.itemSelector,
       cancel: '',
@@ -30,6 +30,15 @@
     return this.each(function () {
       var $items, $dragItems;
       var $container = $(this);
+      var $liveRegion = jQuery('<div />');
+
+      $liveRegion
+        .attr({
+          'aria-live': 'polite',
+          'aria-relevant': 'additions',
+          'aria-atomic': 'true'
+        })
+        .appendTo(jQuery(document.body));
 
       if (options.onChange) {
         mouseOpts.stop = function (_, ui) {
@@ -80,29 +89,59 @@
                       $items;
       }
 
-      function onDraggableClick() {
-        updateItems();
-        var $item = $(this);
-        var itemIndex = $.inArray(this, $dragItems);
-        var $listItem = $items.eq(itemIndex);
-        var isDragging = $item.data('drag-on');
-
-        // toggle stuff
-        $item.data('drag-on', !isDragging);
-
+      function cleanUp() {
         if (options.activeClass) {
-          $listItem.toggleClass(options.activeClass);
+          $items.removeClass(options.activeClass);
         }
 
         if (options.inactiveClass) {
-          $items
-            .filter(function () {
-              return !$(this).is($item) && !$(this).is($item.closest(options.itemSelector));
-            })
-            .toggleClass(options.inactiveClass);
+          $items.removeClass(options.inactiveClass);
         }
+        $dragItems.data('drag-on', false);
+      }
 
-        $item.attr('aria-grabbed', $item.data('drag-on'));
+      function onDraggableClick() {
+        updateItems();
+        var item = this;
+        var $item = $(item);
+        var itemIndex = $.inArray(item, $dragItems);
+        var $listItem = $items.eq(itemIndex);
+        var wasDragging = $item.data('drag-on');
+        var isDragging = !wasDragging;
+        cleanUp();
+
+        if (isDragging) {
+          // toggle stuff
+          $item.data('drag-on', isDragging);
+
+          if (options.activeClass) {
+            $listItem.toggleClass(options.activeClass);
+          }
+
+          if (options.inactiveClass) {
+            $items
+              .removeClass(options.inactiveClass)
+              .filter(function () {
+                return !$(this).is($item) && !$(this).is($item.closest(options.itemSelector));
+              })
+              .toggleClass(options.inactiveClass);
+          }
+        }
+        $item.attr('aria-grabbed', isDragging);
+
+        var ann = options.announcement;
+        if (ann && ann.grab && ann.drop) {
+          var $textElement = (ann.textSelector) ? $listItem.find(ann.textSelector) : $item;
+          var text = $textElement.text(); // the item's text
+          var textOpt = isDragging ? ann.grab : ann.drop;
+          var annText = replacer(textOpt, [text, itemIndex, $items.length]);
+          // kick off the actual announcement
+          if (annText) {
+            setTimeout(function () {
+              $liveRegion.html('<p>' + annText + '</p>');
+            });
+          }
+        }
       }
 
       function onDraggableKeydown(e) {
@@ -166,6 +205,24 @@
         if (options.onChange) {
           options.onChange.call($container[0], $oldItem, $items);
         }
+
+        var a = options.announcement;
+        if (a && a.reorder) {
+          var itemText = (a.textSelector) ?
+                          $oldItem.find(a.textSelector).text() :
+                          $oldItem.text();
+          var annString = replacer(a.reorder, [
+            itemText,
+            $.inArray($oldItem[0], $items) + 1,
+            $items.length
+          ]);
+
+          if (annString) {
+            setTimeout(function () {
+              $liveRegion.html('<p>' + annString + '</p>');
+            });
+          }
+        }
       }
 
       function endOfLine(i, isUp, len) {
@@ -173,4 +230,13 @@
       }
     });
   };
+
+  function replacer(text, replacees) {
+    var i = 0;
+    return text.replace(/%s/g, function () {
+      var thisReplacee = replacees[i];
+      i++;
+      return thisReplacee;
+    });
+  }
 })(jQuery);

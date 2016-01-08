@@ -71,28 +71,14 @@ html(lang='en')
 		script.
 			$('.dragon-drop').dragonDrop({
 				inactiveClass: 'dragon-target',
-				onChange: function ($item, $items) {
-					// tell AT that the order has changed
-					var index = $.inArray($item[0], $items) + 1;
-					var $p = $('<p />');
-					$p.text(
-						'The list has been reordered. ' +
-						$item.find('span').text() +
-						' is now item ' + index +
-						' of ' + $items.length
-					);
-
-					$('#pa-system').append($p);
+				onChange: function () {
+					console.log('The list has changed!!!');
+				},
+				mouseDrag: { containment: 'window' },
+				announcement: {
+					textSelector: 'span',
+					grab: '%s grabbed.',
+			      	drop: '%s dropped.',
+					reorder: 'The list has been reordered. %s is now item %s of %s'
 				}
-			})
-			.find('button').on('click', function () {
-				var $button = $(this);
-				var txt = $button.next().text();
-				setTimeout(function () {
-					if ($button.is('[aria-grabbed="true"]')) {
-						$('#pa-system').append($('<p />').text(txt + ' grabbed. '))
-					} else {
-						$('#pa-system').append($('<p />').text(txt + ' dropped. '))
-					}
-				}, 0);
 			});
