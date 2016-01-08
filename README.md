@@ -2,7 +2,19 @@
 Keyboard accessible drag and drop reorder list
 
 ## Installation
+### bower
 `bower install drag-on-drop`
+
+### git
+`git clone https://github.com/schne324/dragon-drop.git`
+
+`cd dragon-drop`
+
+`npm i`
+
+`bower i`
+
+`open example/example.html`
 
 ## Options
 - `itemSelector` _(required)_: the selector for the actual items to be reordered (defaults to `'li'`).  This will be qualified within `this` (the container calling dragonDrop).
@@ -55,5 +67,6 @@ $('.reorder-list').dragonDrop({
 ```
 
 ## Custom Examples
-If you'd like to make custom examples, you can edit the `example/example.jade` and the `example/styles.styl` files and run `gulp` to build the changes.
+First, run `npm install`, then `bower install` to ensure all the dependencies are installed.
+Then, you can edit the `example/example.jade` and the `example/styles.styl` files and run `gulp` to build the changes.
 (`gulp watch` is available to prevent you from executing `gulp` after each and every change)
