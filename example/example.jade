@@ -72,13 +72,13 @@ html(lang='en')
 			$('.dragon-drop').dragonDrop({
 				inactiveClass: 'dragon-target',
 				onChange: function () {
-					console.log('The list has changed!!!');
+					console.log('onChange has been called!');
 				},
 				mouseDrag: { containment: 'window' },
 				announcement: {
 					textSelector: 'span',
-					grab: '%s grabbed.',
-			      	drop: '%s dropped.',
-					reorder: 'The list has been reordered. %s is now item %s of %s'
+					grab: '$1 grabbed.',
+			      	drop: '$1 dropped.',
+					reorder: 'The list has been reordered. $1 is now item $2 of $3'
 				}
 			});

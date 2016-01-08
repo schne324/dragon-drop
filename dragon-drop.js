@@ -232,11 +232,9 @@
   };
 
   function replacer(text, replacees) {
-    var i = 0;
-    return text.replace(/%s/g, function () {
-      var thisReplacee = replacees[i];
-      i++;
-      return thisReplacee;
+    return text.replace(/\$\d/g, function (match) {
+      var idx = parseInt(match.substr(1)) - 1; // zero-base it
+      return replacees[idx];
     });
   }
 })(jQuery);
