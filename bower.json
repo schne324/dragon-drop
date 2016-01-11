@@ -1,12 +1,12 @@
 {
   "name": "drag-on-drop",
   "main": "dragon-drop.js",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "homepage": "https://github.com/schne324/dragon-drop",
   "authors": [
     "Harris Schneiderman <harris.schneiderman@deque.com>"
   ],
-  "description": "Keyboard/mosue accessible drag and drop jquery plugin",
+  "description": "Keyboard/mouse accessible drag and drop jquery plugin",
   "moduleType": [],
   "license": "MIT",
   "ignore": [
