@@ -12,9 +12,9 @@
     mouseDrag: null, // ANY jquery ui sortable options the user wishes to pass through
     announcement: { // these are all given 3 arguments in this exact order: the item's text, its index, and the total length of items
       textSelector: null, // if not provided, will default to the text of the given item
-      grab: '%s grabbed.',
-      drop: '%s dropped.',
-      reorder: 'The list has been reordered. %s is now item %s of %s'
+      grab: '$1 grabbed.',
+      drop: '$1 dropped.',
+      reorder: 'The list has been reordered. $1 is now item $2 of $3'
     }
   };
 
@@ -70,8 +70,7 @@
               })
               .off('keydown.dragon')
               .on('keydown.dragon', onDraggableKeydown)
-              .off('click.dragon')
-              .on('click.dragon', onDraggableClick);
+              .one('click.dragon', onDraggableClick);
           });
 
         if (options.activeClass) {
@@ -127,6 +126,7 @@
               .toggleClass(options.inactiveClass);
           }
         }
+        $item.attr('aria-pressed', isDragging);
         $item.attr('aria-grabbed', isDragging);
 
         var ann = options.announcement;
@@ -142,6 +142,12 @@
             });
           }
         }
+
+        // fake debouncer because NVDA likes to fire mousedowns and clicks...
+        // (this prevents the undesired double click)
+        setTimeout(function () {
+          $dragItems.one('click.dragon', onDraggableClick);
+        }, 250);
       }
 
       function onDraggableKeydown(e) {
@@ -153,7 +159,7 @@
           case 13:
           case 32:
             e.preventDefault();
-            target.click();
+            $target.click();
             break;
           case 37:
           case 38:
