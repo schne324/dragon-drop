@@ -17,6 +17,7 @@
       reorder: 'The list has been reordered. $1 is now item $2 of $3'
     }
   };
+  var DATA_ATTR = 'dragon-drop-generated-live-region';
 
   $.fn.dragonDrop = function (userOpts) {
     var options = $.extend(options, defaults, userOpts);
@@ -30,15 +31,34 @@
     return this.each(function () {
       var $items, $dragItems;
       var $container = $(this);
-      var $liveRegion = jQuery('<div />');
+      var $liveRegion;
+      if ($(document.body).data(DATA_ATTR)) {
+        $liveRegion = jQuery($(document.body).data(DATA_ATTR));
+      } else {
+        $liveRegion = jQuery('<div />');
 
-      $liveRegion
-        .attr({
-          'aria-live': 'polite',
-          'aria-relevant': 'additions',
-          'aria-atomic': 'true'
-        })
-        .appendTo(jQuery(document.body));
+        $liveRegion
+          // polite announcement attributes
+          .attr({
+            'aria-live': 'polite',
+            'aria-relevant': 'additions',
+            'aria-atomic': 'true'
+          })
+          // make it 'offscreen'
+          .css({
+            'position': 'absolute',
+            'clip': 'rect(1px, 1px, 1px, 1px)',
+            'width': '1px',
+            'height': '1px',
+            'margin-top': '-1px'
+          })
+          // insert it into the DOM
+          .appendTo(jQuery(document.body));
+
+        // we only need to add this once per page load...
+        // (we don't want to keep adding new regions if its not needed)
+        $(document.body).data(DATA_ATTR, $liveRegion[0]);
+      }
 
       if (options.onChange) {
         mouseOpts.stop = function (_, ui) {
@@ -70,6 +90,7 @@
               })
               .off('keydown.dragon')
               .on('keydown.dragon', onDraggableKeydown)
+              .off('click.dragon')
               .one('click.dragon', onDraggableClick);
           });
 
