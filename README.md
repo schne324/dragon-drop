@@ -23,10 +23,19 @@ Keyboard accessible drag and drop reorder list
 - `onChange` _(optional)_: a function that is invoked whenever a keyboard or mouse reorder has taken place.  The function accepts two arguments: `$item` which is a jquery reference to the newly dropped item, and `$items` which is a query collection of the entire list. `this` is also made available within the callback.
 - `mouseDrag` _(optional)_: any desired options to pass into jQuery UI's sortable (http://api.jqueryui.com/sortable/)
 - `announcement` _(optional)_: configuration object for the live region announcement
-	- `textSelector` _(optional)_: the selector for element of which to grab text from. If not provided, will default to the text of the given item
- 	- `grab` _(optional)_: the desired readout for when an item is 'grabbed'. You may use `'$1'` (the item's text), `'$2'` (the position within the list of the newly grabbed item), and `'$3'` (the total number of items in the list)
- 	- `drop` _(optional)_: the desired readout for when an item is 'dropped'. You may use `'$1'` (the item's text), `'$2'` (the position within the list of the newly dropped item), and `'$3'` (the total number of items in the list)
- 	- `reorder` _(optional)_: the desired readout for when the list is 'reordered'. You may use `'$1'` (the newly moved item's text), `'$2'` (the position within the list of the newly moved item), and `'$3'` (the total number of items in the list)
+	- `textSelector` _(optional)_: the selector for element of which to grab text from. If not provided, will default to the text of the given item (defaults to `null`).
+ 	- `grab` _(optional)_: the desired readout for when an item is 'grabbed' (defaults to `'$1 grabbed'`). You may use:
+ 		- `'$1'` (the item's text)
+ 		- `'$2'` (the position within the list of the newly grabbed item)
+ 		- `'$3'` (the total number of items in the list)
+ 	- `drop` _(optional)_: the desired readout for when an item is 'dropped' (defaults to `'$1 dropped'`). You may use:
+ 		- `'$1'` (the item's text)
+ 		- `'$2'` (the position within the list of the newly dropped item)
+ 		- `'$3'` (the total number of items in the list)
+ 	- `reorder` _(optional)_: the desired readout for when the list is 'reordered' (defaults to `'The list has been reordered. $1 is now item $2 of $3'`). You may use:
+ 		- `'$1'` (the newly moved item's text)
+ 		- `'$2'` (the position within the list of the newly moved item)
+ 		- `'$3'` (the total number of items in the list)
 
 ## Example
 given the following html...

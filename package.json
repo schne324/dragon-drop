@@ -1,6 +1,6 @@
 {
   "name": "drag-on-drop",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "Drag and/or drop",
   "main": "dragon-drop.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/schne324/dragon-drop.git"
   },
-  "author": "",
+  "author": "Harris Schneiderman",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/schne324/dragon-drop/issues"
