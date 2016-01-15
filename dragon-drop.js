@@ -276,6 +276,11 @@
       function setupAnnouncement(data) {
         var $item = data.item;
         var itemIndex = $.inArray($item[0], $items) + 1;
+
+        if (!itemIndex) {
+          return;
+        }
+
         var $textElement = (ann.textSelector) ? $item.find(ann.textSelector) : $item;
         var text = $textElement.text(); // the item's text
         var textOpt = data.text;
