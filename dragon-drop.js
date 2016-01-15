@@ -76,7 +76,7 @@
           options.onChange.call(this, ui.item, $container.find(options.itemSelector));
         }
         if (userStop) {
-          mouseOpts.stop(e, ui);
+          userStop(e, ui);
         }
 
         if (ann && ann.reorder) {
