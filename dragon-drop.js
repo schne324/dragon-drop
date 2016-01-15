@@ -3,6 +3,8 @@
 ;(function($){
   'use strict';
 
+  var CLEAN_AFTER = 5000;
+  var DATA_ATTR = 'dragon-drop-generated-live-region';
   var defaults = {
     itemSelector: 'li', // qualified within `this`
     dragSelector:  '.dragon', // qualified within `itemSelector` (optional, if not provided itemSelector will be used as dragSelector)
@@ -17,14 +19,12 @@
       reorder: 'The list has been reordered. $1 is now item $2 of $3'
     }
   };
-  var DATA_ATTR = 'dragon-drop-generated-live-region';
 
   $.fn.dragonDrop = function (userOpts) {
     var options = $.extend(options, defaults, userOpts);
     var mouseOpts = options.mouseDrag || {
       placeholder: 'dragon-placeholder',
-      items: options.itemSelector,
-      cancel: '',
+      cancel: false,
       forcePlaceholderSize: true
     };
 
@@ -60,18 +60,51 @@
         $(document.body).data(DATA_ATTR, $liveRegion[0]);
       }
 
-      if (options.onChange) {
-        mouseOpts.stop = function (_, ui) {
-          options.onChange.call(this, ui.item, $container.find(options.itemSelector));
-        };
-      }
-
-      $container.sortable(mouseOpts);
-
-      // update refs after mouse drag changes dom
-      $container.on('sortupdate', updateItems);
+      var ann = options.announcement;
 
       setup();
+
+      // force item selector to prevent user from breaking functionality
+      mouseOpts.items = options.itemSelector;
+
+      // force the stop and starts to be fired and cache
+      // existing callbacks and invoke them if they exist
+      var userStop = mouseOpts.stop;
+      mouseOpts.stop = function (e, ui) {
+        updateItems();
+        if (options.onChange) {
+          options.onChange.call(this, ui.item, $container.find(options.itemSelector));
+        }
+        if (userStop) {
+          mouseOpts.stop(e, ui);
+        }
+
+        if (ann && ann.reorder) {
+          setupAnnouncement({
+            item: ui.item,
+            text: ann.reorder
+          });
+        }
+      };
+
+      var userStart = mouseOpts.start;
+      mouseOpts.start = function (e, ui) {
+        var $listItem = ui.item;
+
+        if (ann && ann.grab) {
+          updateItems();
+          setupAnnouncement({
+            item: $listItem,
+            text: ann.grab
+          });
+        }
+
+        if (userStart) {
+          userStart(e, ui);
+        }
+      };
+
+      $container.sortable(mouseOpts);
 
       function setup() {
         updateItems();
@@ -152,22 +185,16 @@
 
         var ann = options.announcement;
         if (ann && ann.grab && ann.drop) {
-          var $textElement = (ann.textSelector) ? $listItem.find(ann.textSelector) : $item;
-          var text = $textElement.text(); // the item's text
-          var textOpt = isDragging ? ann.grab : ann.drop;
-          var annText = replacer(textOpt, [text, itemIndex, $items.length]);
-          // kick off the actual announcement
-          if (annText) {
-            setTimeout(function () {
-              $liveRegion.html('<p>' + annText + '</p>');
-            });
-          }
+          setupAnnouncement({
+            item: $listItem,
+            text: isDragging ? ann.grab : ann.drop
+          });
         }
 
         // fake debouncer because NVDA likes to fire mousedowns and clicks...
         // (this prevents the undesired double click)
         setTimeout(function () {
-          $dragItems.one('click.dragon', onDraggableClick);
+          $dragItems.off('click.dragon').one('click.dragon', onDraggableClick);
         }, 250);
       }
 
@@ -235,25 +262,28 @@
 
         var a = options.announcement;
         if (a && a.reorder) {
-          var itemText = (a.textSelector) ?
-                          $oldItem.find(a.textSelector).text() :
-                          $oldItem.text();
-          var annString = replacer(a.reorder, [
-            itemText,
-            $.inArray($oldItem[0], $items) + 1,
-            $items.length
-          ]);
-
-          if (annString) {
-            setTimeout(function () {
-              $liveRegion.html('<p>' + annString + '</p>');
-            });
-          }
+          setupAnnouncement({
+            item: $oldItem,
+            text: a.reorder
+          });
         }
       }
 
       function endOfLine(i, isUp, len) {
         return i === -1  || isUp && i === 0 || !isUp && i === len - 1;
+      }
+
+      function setupAnnouncement(data) {
+        var $item = data.item;
+        var itemIndex = $.inArray($item[0], $items) + 1;
+        var $textElement = (ann.textSelector) ? $item.find(ann.textSelector) : $item;
+        var text = $textElement.text(); // the item's text
+        var textOpt = data.text;
+        var annText = replacer(textOpt, [text, itemIndex, $items.length]);
+          // kick off the actual announcement
+        if (annText) {
+          newAnnouncement($liveRegion, annText);
+        }
       }
     });
   };
@@ -262,6 +292,20 @@
     return text.replace(/\$\d/g, function (match) {
       var idx = parseInt(match.substr(1)) - 1; // zero-base it
       return replacees[idx];
+    });
+  }
+
+  function cleanRegion($p) {
+    setTimeout(function () {
+      $p.remove();
+    }, CLEAN_AFTER);
+  }
+
+  function newAnnouncement($region, text) {
+    var $newAnn = jQuery('<p />').text(text);
+    setTimeout(function () {
+      $region.append($newAnn);
+      cleanRegion($newAnn);
     });
   }
 })(jQuery);

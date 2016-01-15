@@ -19,9 +19,10 @@ Keyboard accessible drag and drop reorder list
 ## Options
 - `itemSelector` _(required)_: the selector for the actual items to be reordered (defaults to `'li'`).  This will be qualified within `this` (the container calling dragonDrop).
 - `dragSelector` _(optional)_: the selector for the "handle" if applicable (defaults to `'.dragon'`). This is qualified within the `itemSelector` elements.
-- `activeClass` _(optional)_: the class that is added to an actively dragging item - keyboard only (defaults to `'drag-on'`.
+- `activeClass` _(optional)_: the class to be added to an actively dragging item - keyboard only (defaults to `'drag-on'`.
+- `inactiveClass` _(optional)_: the class to be added to other items when an item is actively dragging
 - `onChange` _(optional)_: a function that is invoked whenever a keyboard or mouse reorder has taken place.  The function accepts two arguments: `$item` which is a jquery reference to the newly dropped item, and `$items` which is a query collection of the entire list. `this` is also made available within the callback.
-- `mouseDrag` _(optional)_: any desired options to pass into jQuery UI's sortable (http://api.jqueryui.com/sortable/)
+- `mouseDrag` _(optional)_: any desired options to pass into jQuery UI's sortable - http://api.jqueryui.com/sortable/ - (the `placeholder` option defaults to `'dragon-placeholder'`).
 - `announcement` _(optional)_: configuration object for the live region announcement
 	- `textSelector` _(optional)_: the selector for element of which to grab text from. If not provided, will default to the text of the given item (defaults to `null`).
  	- `grab` _(optional)_: the desired readout for when an item is 'grabbed' (defaults to `'$1 grabbed'`). You may use:
