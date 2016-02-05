@@ -50,7 +50,8 @@
             'clip': 'rect(1px, 1px, 1px, 1px)',
             'width': '1px',
             'height': '1px',
-            'margin-top': '-1px'
+            'margin-top': '-1px',
+            'overflow': 'hidden'
           })
           // insert it into the DOM
           .appendTo(jQuery(document.body));
