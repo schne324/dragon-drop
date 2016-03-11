@@ -11,7 +11,7 @@
     activeClass: 'drag-on',
     inactiveClass: null,
     onChange: null,
-    mouseDrag: null, // ANY jquery ui sortable options the user wishes to pass through
+    mouseDrag: null, // ANY sortable options the user wishes to pass through (https://github.com/voidberg/html5sortable#options)
     announcement: { // these are all given 3 arguments in this exact order: the item's text, its index, and the total length of items
       textSelector: null, // if not provided, will default to the text of the given item
       grab: '$1 grabbed.',
@@ -23,7 +23,7 @@
   $.fn.dragonDrop = function (userOpts) {
     var options = $.extend(options, defaults, userOpts);
     var mouseOpts = options.mouseDrag || {
-      placeholder: 'dragon-placeholder',
+      placeholderClass: 'dragon-placeholder',
       cancel: false,
       forcePlaceholderSize: true
     };
@@ -50,7 +50,7 @@
             'clip': 'rect(1px, 1px, 1px, 1px)',
             'width': '1px',
             'height': '1px',
-            'margin-top': '-1px',
+            'margin-top': '-1px', // don't take up space in dom
             'overflow': 'hidden'
           })
           // insert it into the DOM
@@ -67,45 +67,40 @@
 
       // force item selector to prevent user from breaking functionality
       mouseOpts.items = options.itemSelector;
-
-      // force the stop and starts to be fired and cache
-      // existing callbacks and invoke them if they exist
-      var userStop = mouseOpts.stop;
-      mouseOpts.stop = function (e, ui) {
-        updateItems();
-        if (options.onChange) {
-          options.onChange.call(this, ui.item, $container.find(options.itemSelector));
-        }
-        if (userStop) {
-          userStop(e, ui);
-        }
-
-        if (ann && ann.reorder) {
-          setupAnnouncement({
-            item: ui.item,
-            text: ann.reorder
-          });
-        }
-      };
-
+      // cache any user start/stop events
       var userStart = mouseOpts.start;
-      mouseOpts.start = function (e, ui) {
-        var $listItem = ui.item;
+      var userStop = mouseOpts.stop;
 
-        if (ann && ann.grab) {
+      $container
+        .sortable(mouseOpts)
+        .on('sortstart', function (e, ui) {
+          if (ann && ann.grab) {
+            var $listItem = ui.item;
+            setupAnnouncement({
+              item: $listItem,
+              text: ann.grab
+            });
+          }
+          if (userStart) {
+            userStart(e, ui);
+          }
+        })
+        .on('sortstop', function (e, ui) {
           updateItems();
-          setupAnnouncement({
-            item: $listItem,
-            text: ann.grab
-          });
-        }
+          if (options.onChange) {
+            options.onChange.call(this, ui.item, $container.find(options.itemSelector));
+          }
+          if (userStop) {
+            userStop(e, ui);
+          }
 
-        if (userStart) {
-          userStart(e, ui);
-        }
-      };
-
-      $container.sortable(mouseOpts);
+          if (ann && ann.reorder) {
+            setupAnnouncement({
+              item: ui.item,
+              text: ann.reorder
+            });
+          }
+        });
 
       function setup() {
         updateItems();

@@ -22,7 +22,7 @@ Keyboard accessible drag and drop reorder list
 - `activeClass` _(optional)_: the class to be added to an actively dragging item - keyboard only (defaults to `'drag-on'`.
 - `inactiveClass` _(optional)_: the class to be added to other items when an item is actively dragging
 - `onChange` _(optional)_: a function that is invoked whenever a keyboard or mouse reorder has taken place.  The function accepts two arguments: `$item` which is a jquery reference to the newly dropped item, and `$items` which is a query collection of the entire list. `this` is also made available within the callback.
-- `mouseDrag` _(optional)_: any desired options to pass into jQuery UI's sortable - http://api.jqueryui.com/sortable/ - (the `placeholder` option defaults to `'dragon-placeholder'`).
+- `mouseDrag` _(optional)_: ANY sortable options the user wishes to pass through - https://github.com/voidberg/html5sortable#options - (the `placeholder` option defaults to `'dragon-placeholder'`).
 - `announcement` _(optional)_: configuration object for the live region announcement
 	- `textSelector` _(optional)_: the selector for element of which to grab text from. If not provided, will default to the text of the given item (defaults to `null`).
  	- `grab` _(optional)_: the desired readout for when an item is 'grabbed' (defaults to `'$1 grabbed'`). You may use:
@@ -80,3 +80,6 @@ $('.reorder-list').dragonDrop({
 First, run `npm install`, then `bower install` to ensure all the dependencies are installed.
 Then, you can edit the `example/example.jade` and the `example/styles.styl` files and run `gulp` to build the changes.
 (`gulp watch` is available to prevent you from executing `gulp` after each and every change)
+
+## Dependencies
+This plugin leverages the html5 sortable plugin https://github.com/voidberg/html5sortable and adds accessible/keyboard enhancements.

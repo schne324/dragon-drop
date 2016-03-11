@@ -59,6 +59,26 @@ html(lang='en')
 				)
 					.offscreen Reorder
 				span#item-5 Item 5
+			li
+				button(
+					type='button'
+					class='dragon ion ion-ios-drag'
+					id='button-6'
+					aria-labelledby='button-6 item-6'
+					aria-describedby="dragon-assistant"
+				)
+					.offscreen Reorder
+				span#item-6 Item 6
+			li
+				button(
+					type='button'
+					class='dragon ion ion-ios-drag'
+					id='button-7'
+					aria-labelledby='button-7 item-7'
+					aria-describedby="dragon-assistant"
+				)
+					.offscreen Reorder
+				span#item-7 Item 7
 		#pa-system.offscreen(
 			role='log'
 			aria-live='polite'
@@ -66,7 +86,7 @@ html(lang='en')
 			aria-atomic='false'
 		)
 		script(src='http://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.js')
-		script(src='../bower_components/jquery-ui-sortable-min/jquery-ui-sortable-min.js')
+		script(src='../bower_components/html.sortable/dist/html.sortable.min.js')
 		script(src='../dragon-drop.js')
 		script.
 			$('.dragon-drop').dragonDrop({
@@ -74,7 +94,6 @@ html(lang='en')
 				onChange: function () {
 					console.log('onChange has been called!');
 				},
-				mouseDrag: { containment: 'window' },
 				announcement: {
 					textSelector: 'span',
 					grab: '$1 grabbed.',
