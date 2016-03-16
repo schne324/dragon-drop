@@ -1,6 +1,6 @@
 {
   "name": "drag-on-drop",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Drag and/or drop",
   "main": "dragon-drop.js",
   "scripts": {

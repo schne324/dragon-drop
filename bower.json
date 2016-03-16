@@ -1,7 +1,7 @@
 {
   "name": "drag-on-drop",
   "main": "dragon-drop.js",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "homepage": "https://github.com/schne324/dragon-drop",
   "authors": [
     "Harris Schneiderman <harris.schneiderman@deque.com>"
@@ -17,6 +17,6 @@
     "tests"
   ],
   "dependencies": {
-    "html.sortable": "dd-mouse-sortable#^1.0.0"
+    "dd-mouse-sortable": "^1.0.1"
   }
 }

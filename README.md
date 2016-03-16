@@ -66,7 +66,7 @@ $('.reorder-list').dragonDrop({
 	onChange: function ($item, $items) {
 		alert($item.text() + ' has been dropped!');
 	},
-	mouseDrag: {containment: 'window'},
+	mouseDrag: {placeholderClass: 'foo-placeholder'},
 	announcement: {
 		textSelector: '.item-text',
 		grab: 'the dragon has grabbed $1',
