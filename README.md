@@ -2,6 +2,10 @@
 Keyboard accessible drag and drop reorder list
 
 ## Installation
+
+## npm
+`npm install drag-on-drop`
+
 ### bower
 `bower install drag-on-drop`
 
