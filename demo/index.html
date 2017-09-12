@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Dragon Drop</title>
+    <style>
+      #demo { text-align: center; }
+      #demo > li {
+        list-style-type: none;
+        margin: 0 auto;
+        padding 5px;
+        border: 5px solid;
+      }
+      .gu-mirror {
+        position: fixed !important;
+        margin: 0 !important;
+        z-index: 9999 !important;
+        opacity: 0.8;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+        filter: alpha(opacity=80);
+        padding 5px;
+        border: 5px solid;
+      }
+      .gu-hide {
+        display: none !important;
+      }
+      .gu-unselectable {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+      }
+      .gu-transit {
+        opacity: 0.2;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+        filter: alpha(opacity=20);
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="demo">
+      <li><button type='button'>reorder</button><span>1</span></li>
+      <li><button type='button'>reorder</button><span>2</span></li>
+      <li><button type='button'>reorder</button><span>3</span></li>
+    </ul>
+    <script src="../dist/dragon-drop.min.js"></script>
+    <script>
+      window.dd = new DragonDrop.default(document.getElementById('demo'));
+    </script>
+  </body>
+</html>
