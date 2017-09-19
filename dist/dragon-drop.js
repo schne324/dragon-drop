@@ -15,9 +15,9 @@ var _liveRegion = require('live-region');
 
 var _liveRegion2 = _interopRequireDefault(_liveRegion);
 
-var _objectAssign = require('object-assign');
+var _mergeOptions = require('merge-options');
 
-var _objectAssign2 = _interopRequireDefault(_objectAssign);
+var _mergeOptions2 = _interopRequireDefault(_mergeOptions);
 
 var _debug = require('debug');
 
@@ -82,7 +82,7 @@ var DragonDrop = function () {
     this.initElements(container);
 
     // init mouse drag via dragula
-    this.dragula = (0, _dragula2.default)([document.getElementById('demo')]);
+    this.dragula = (0, _dragula2.default)([container]);
     this.mouseEvents();
     // init live region for custom announcements
     this.liveRegion = new _liveRegion2.default({
@@ -103,10 +103,7 @@ var DragonDrop = function () {
     value: function initOptions(userOptions) {
       userOptions = userOptions || {};
       userOptions.announcement = userOptions.announcement || {};
-      var announceOpts = (0, _objectAssign2.default)(_defaults2.default.announcement, userOptions.announcement);
-      // merge user opts with defaults
-      this.options = (0, _objectAssign2.default)(_defaults2.default, userOptions);
-      this.options.announcement = announceOpts;
+      this.options = (0, _mergeOptions2.default)({}, _defaults2.default, userOptions);
       debug('dragon drop options: ', this.options);
     }
 
@@ -120,11 +117,16 @@ var DragonDrop = function () {
     value: function initElements(container) {
       var _this = this;
 
+      var _options = this.options,
+          activeClass = _options.activeClass,
+          inactiveClass = _options.inactiveClass;
+
+
       this.container = container;
       this.setItems();
 
       // set all attrs/props/events on dragger elements
-      this.draggers.forEach(function (dragger) {
+      this.draggers.forEach(function (dragger, i) {
         dragger.tabIndex = 0; // ensure it is focusable
         dragger.setAttribute('role', 'button');
         // TODO: if we're using a live region, should these attrs be omitted?
@@ -133,9 +135,24 @@ var DragonDrop = function () {
         // events
         dragger.addEventListener('keydown', _this.onKeydown.bind(_this));
         dragger.addEventListener('click', function () {
-          var wasPressed = dragger.getAttribute('drag-on') === 'true';
+          var wasPressed = dragger.getAttribute('data-drag-on') === 'true';
+
           dragger.setAttribute('aria-pressed', '' + !wasPressed);
-          dragger.setAttribute('drag-on', '' + !wasPressed);
+          dragger.setAttribute('data-drag-on', '' + !wasPressed);
+          _this.announcement(wasPressed ? 'dropped' : 'grabbed', _this.items[i]);
+          // configure classes (active and inactive)
+          _this.items.forEach(function (item) {
+            var method = !wasPressed ? 'add' : 'remove';
+            var isTarget = item === dragger || item.contains(dragger);
+
+            item.classList[isTarget && !wasPressed ? 'add' : 'remove'](activeClass);
+            item.classList[isTarget && !wasPressed ? 'remove' : method](inactiveClass);
+          });
+
+          if (!wasPressed) {
+            // cache the initial order to allow for escape cancellation
+            _this.cachedItems = (0, _queryAll2.default)(_this.options.item, container);
+          }
         });
       });
     }
@@ -153,7 +170,7 @@ var DragonDrop = function () {
           which = e.which;
 
       var isDrag = function isDrag() {
-        return target.getAttribute('drag-on') === 'true';
+        return target.getAttribute('data-drag-on') === 'true';
       };
 
       switch (which) {
@@ -174,6 +191,12 @@ var DragonDrop = function () {
         case 9:
           if (isDrag()) {
             target.click();
+          }
+          break;
+        case 27:
+          if (isDrag()) {
+            target.click();
+            this.cancel();
           }
       }
     }
@@ -206,6 +229,7 @@ var DragonDrop = function () {
   }, {
     key: 'announcement',
     value: function announcement(type, item) {
+      debug(type + ' announcement', item);
       var config = this.options.announcement || {};
       var funk = config[type];
 
@@ -227,6 +251,20 @@ var DragonDrop = function () {
         _this2.announcement('dropped', el);
       });
     }
+  }, {
+    key: 'cancel',
+    value: function cancel() {
+      var _this3 = this;
+
+      // cache active element so it can be focused after reorder
+      var focused = document.activeElement;
+      // restore the order of the list
+      this.cachedItems.forEach(function (item) {
+        return _this3.container.appendChild(item);
+      });
+      this.items = this.cachedItems;
+      focused.focus();
+    }
   }]);
 
   return DragonDrop;
@@ -234,7 +272,7 @@ var DragonDrop = function () {
 
 exports.default = DragonDrop;
 
-},{"./lib/defaults":2,"./lib/query-all":3,"component-emitter":5,"debug":11,"dragula":14,"live-region":15,"object-assign":17}],2:[function(require,module,exports){
+},{"./lib/defaults":2,"./lib/query-all":3,"component-emitter":5,"debug":11,"dragula":14,"live-region":16,"merge-options":17}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -247,10 +285,10 @@ var defaults = {
   inactiveClass: 'dragon-inactive', // added to other items when item is being dragged
   announcement: {
     grabbed: function grabbed(el) {
-      return el.innerText + ' grabbed';
+      return 'Item ' + el.innerText + ' grabbed';
     },
     dropped: function dropped(el) {
-      return el.innerText + ' dropped';
+      return 'Item ' + el.innerText + ' dropped';
     },
     reorder: function reorder(el, items) {
       var pos = items.indexOf(el) + 1;
@@ -455,7 +493,7 @@ module.exports = function debounce (fn, args, ctx) {
   });
 };
 
-},{"ticky":19}],7:[function(require,module,exports){
+},{"ticky":20}],7:[function(require,module,exports){
 'use strict';
 
 var atoa = require('atoa');
@@ -879,7 +917,7 @@ function localstorage() {
 }
 
 }).call(this,require('_process'))
-},{"./debug":12,"_process":18}],12:[function(require,module,exports){
+},{"./debug":12,"_process":19}],12:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1106,7 +1144,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":16}],13:[function(require,module,exports){
+},{"ms":18}],13:[function(require,module,exports){
 'use strict';
 
 var cache = {};
@@ -1755,6 +1793,15 @@ module.exports = dragula;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./classes":13,"contra/emitter":7,"crossvent":8}],15:[function(require,module,exports){
 'use strict';
+var toString = Object.prototype.toString;
+
+module.exports = function (x) {
+	var prototype;
+	return toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));
+};
+
+},{}],16:[function(require,module,exports){
+'use strict';
 
 /**
  * Creates the region
@@ -1828,7 +1875,164 @@ if (typeof module !== 'undefined') {
   module.exports = LiveRegion;
 }
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
+'use strict';
+const isOptionObject = require('is-plain-obj');
+
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+const propIsEnumerable = Object.propertyIsEnumerable;
+const globalThis = this;
+const defaultMergeOpts = {
+	concatArrays: false
+};
+
+const getEnumerableOwnPropertyKeys = value => {
+	const keys = [];
+
+	for (const key in value) {
+		if (hasOwnProperty.call(value, key)) {
+			keys.push(key);
+		}
+	}
+
+	/* istanbul ignore else  */
+	if (Object.getOwnPropertySymbols) {
+		const symbols = Object.getOwnPropertySymbols(value);
+
+		for (let i = 0; i < symbols.length; i++) {
+			if (propIsEnumerable.call(value, symbols[i])) {
+				keys.push(symbols[i]);
+			}
+		}
+	}
+
+	return keys;
+};
+
+function clone(value) {
+	if (Array.isArray(value)) {
+		return cloneArray(value);
+	}
+
+	if (isOptionObject(value)) {
+		return cloneOptionObject(value);
+	}
+
+	return value;
+}
+
+function cloneArray(array) {
+	const result = array.slice(0, 0);
+
+	getEnumerableOwnPropertyKeys(array).forEach(key => {
+		result[key] = clone(array[key]);
+	});
+
+	return result;
+}
+
+function cloneOptionObject(obj) {
+	const result = Object.getPrototypeOf(obj) === null ? Object.create(null) : {};
+
+	getEnumerableOwnPropertyKeys(obj).forEach(key => {
+		result[key] = clone(obj[key]);
+	});
+
+	return result;
+}
+
+/**
+ * @param merged {already cloned}
+ * @return {cloned Object}
+ */
+const mergeKeys = (merged, source, keys, mergeOpts) => {
+	keys.forEach(key => {
+		if (key in merged) {
+			merged[key] = merge(merged[key], source[key], mergeOpts);
+		} else {
+			merged[key] = clone(source[key]);
+		}
+	});
+
+	return merged;
+};
+
+/**
+ * @param merged {already cloned}
+ * @return {cloned Object}
+ *
+ * see [Array.prototype.concat ( ...arguments )](http://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.concat)
+ */
+const concatArrays = (merged, source, mergeOpts) => {
+	let result = merged.slice(0, 0);
+	let resultIndex = 0;
+
+	[merged, source].forEach(array => {
+		const indices = [];
+
+		// `result.concat(array)` with cloning
+		for (let k = 0; k < array.length; k++) {
+			if (!hasOwnProperty.call(array, k)) {
+				continue;
+			}
+
+			indices.push(String(k));
+
+			if (array === merged) {
+				// Already cloned
+				result[resultIndex++] = array[k];
+			} else {
+				result[resultIndex++] = clone(array[k]);
+			}
+		}
+
+		// Merge non-index keys
+		result = mergeKeys(result, array, getEnumerableOwnPropertyKeys(array).filter(key => {
+			return indices.indexOf(key) === -1;
+		}), mergeOpts);
+	});
+
+	return result;
+};
+
+/**
+ * @param merged {already cloned}
+ * @return {cloned Object}
+ */
+function merge(merged, source, mergeOpts) {
+	if (mergeOpts.concatArrays && Array.isArray(merged) && Array.isArray(source)) {
+		return concatArrays(merged, source, mergeOpts);
+	}
+
+	if (!isOptionObject(source) || !isOptionObject(merged)) {
+		return clone(source);
+	}
+
+	return mergeKeys(merged, source, getEnumerableOwnPropertyKeys(source), mergeOpts);
+}
+
+module.exports = function () {
+	const mergeOpts = merge(clone(defaultMergeOpts), (this !== globalThis && this) || {}, defaultMergeOpts);
+	let merged = {};
+
+	for (let i = 0; i < arguments.length; i++) {
+		const option = arguments[i];
+
+		if (option === undefined) {
+			continue;
+		}
+
+		if (!isOptionObject(option)) {
+			throw new TypeError('`' + option + '` is not an Option Object');
+		}
+
+		merged = merge(merged, option, mergeOpts);
+	}
+
+	return merged;
+};
+
+},{"is-plain-obj":15}],18:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -1982,99 +2186,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],17:[function(require,module,exports){
-/*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
-
-'use strict';
-/* eslint-disable no-unused-vars */
-var getOwnPropertySymbols = Object.getOwnPropertySymbols;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
-
-	return Object(val);
-}
-
-function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
-
-		// Detect buggy property enumeration order in older V8 versions.
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !==
-				'abcdefghijklmnopqrst') {
-			return false;
-		}
-
-		return true;
-	} catch (err) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
-}
-
-module.exports = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
-
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
-
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
-
-		if (getOwnPropertySymbols) {
-			symbols = getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
-
-	return to;
-};
-
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -2260,7 +2372,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var si = typeof setImmediate === 'function', tick;
 if (si) {
   tick = function (fn) { setImmediate(fn); };

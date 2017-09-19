@@ -1,6 +1,6 @@
 import dragula from 'dragula';
 import LiveRegion from 'live-region';
-import objectAssign from 'object-assign';
+import mergeOptions from 'merge-options';
 import createDebug from 'debug';
 import Emitter from 'component-emitter';
 
@@ -48,7 +48,7 @@ export default class DragonDrop {
     this.initElements(container);
 
     // init mouse drag via dragula
-    this.dragula = dragula([document.getElementById('demo')]);
+    this.dragula = dragula([container]);
     this.mouseEvents();
     // init live region for custom announcements
     this.liveRegion = new LiveRegion({
@@ -65,10 +65,7 @@ export default class DragonDrop {
   initOptions(userOptions) {
     userOptions = userOptions || {};
     userOptions.announcement = userOptions.announcement || {};
-    const announceOpts = objectAssign(defaults.announcement, userOptions.announcement);
-    // merge user opts with defaults
-    this.options = objectAssign(defaults, userOptions);
-    this.options.announcement = announceOpts;
+    this.options = mergeOptions({}, defaults, userOptions);
     debug('dragon drop options: ', this.options);
   }
 
@@ -77,22 +74,38 @@ export default class DragonDrop {
    * @param {HTMLElement} container the containing element
    */
   initElements(container) {
+    const { activeClass, inactiveClass } = this.options;
+
     this.container = container;
     this.setItems();
 
     // set all attrs/props/events on dragger elements
-    this.draggers.forEach(dragger => {
+    // TODO: Test AT support for aria-grabbed ('false') and aria-dropeffect ('move')
+    this.draggers.forEach((dragger, i) => {
       dragger.tabIndex = 0; // ensure it is focusable
       dragger.setAttribute('role', 'button');
-      // TODO: if we're using a live region, should these attrs be omitted?
-      dragger.setAttribute('aria-grabbed', 'false');
-      dragger.setAttribute('aria-dropeffect', 'move');
+
       // events
       dragger.addEventListener('keydown', this.onKeydown.bind(this));
       dragger.addEventListener('click', () => {
-        const wasPressed = dragger.getAttribute('drag-on') === 'true';
+        const wasPressed = dragger.getAttribute('data-drag-on') === 'true';
+
         dragger.setAttribute('aria-pressed', `${!wasPressed}`);
-        dragger.setAttribute('drag-on', `${!wasPressed}`);
+        dragger.setAttribute('data-drag-on', `${!wasPressed}`);
+        this.announcement(wasPressed ? 'dropped' : 'grabbed', this.items[i]);
+        // configure classes (active and inactive)
+        this.items.forEach(item => {
+          const method = !wasPressed ? 'add' : 'remove';
+          const isTarget = item === dragger || item.contains(dragger);
+
+          item.classList[(isTarget && !wasPressed) ? 'add' : 'remove'](activeClass);
+          item.classList[(isTarget && !wasPressed) ? 'remove' : method](inactiveClass);
+        });
+
+        if (!wasPressed) {
+          // cache the initial order to allow for escape cancellation
+          this.cachedItems = queryAll(this.options.item, container);
+        }
       });
     });
   }
@@ -107,7 +120,7 @@ export default class DragonDrop {
 
   onKeydown(e) {
     const { target, which } = e;
-    const isDrag = () => target.getAttribute('drag-on') === 'true';
+    const isDrag = () => target.getAttribute('data-drag-on') === 'true';
 
     switch (which) {
       case 13:
@@ -127,6 +140,12 @@ export default class DragonDrop {
       case 9:
         if (isDrag()) {
           target.click();
+        }
+        break;
+      case 27:
+        if (isDrag()) {
+          target.click();
+          this.cancel();
         }
     }
   }
@@ -156,6 +175,7 @@ export default class DragonDrop {
   }
 
   announcement(type, item) {
+    debug(`${type} announcement`, item);
     const config = this.options.announcement || {};
     const funk = config[type];
 
@@ -173,5 +193,14 @@ export default class DragonDrop {
     this.dragula.on('drop', el => {
       this.announcement('dropped', el);
     });
+  }
+
+  cancel() {
+    // cache active element so it can be focused after reorder
+    const focused = document.activeElement;
+    // restore the order of the list
+    this.cachedItems.forEach(item => this.container.appendChild(item));
+    this.items = this.cachedItems;
+    focused.focus();
   }
 }
