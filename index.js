@@ -1,3 +1,13 @@
+/**
+ * TODO:
+ * - Dragula supports handles (the "move" option
+ * (function))...if handle is provided, configure this
+ *
+ * - rename (or maybe just alias) "dragger" to "handle"
+ *
+ * - dragging with mouse then with keyboard is buggy - update arrays on drag end of mouse
+ */
+
 import dragula from 'dragula';
 import LiveRegion from 'live-region';
 import mergeOptions from 'merge-options';
@@ -41,6 +51,8 @@ export default class DragonDrop {
    *                                           are passed as arguments respectively. The function
    *                                           should return a string of text to be announced in
    *                                           the live region.
+   * @option {Function} announcement.cancel - The function called when the reorder is cancelled
+   *                                          (via ESC). No arguments passed in.
    */
   constructor(container, userOptions) {
     Emitter(this);
@@ -143,8 +155,8 @@ export default class DragonDrop {
         break;
       case 27:
         if (isDrag()) {
-          target.click();
           this.cancel();
+          target.click();
         }
     }
   }
@@ -201,5 +213,9 @@ export default class DragonDrop {
     this.cachedItems.forEach(item => this.container.appendChild(item));
     this.items = this.cachedItems;
     focused.focus();
+    this.announcement('cancel');
   }
 }
+
+// make window.DragonDrop available rather than window.DragonDrop.default
+module.exports = DragonDrop;

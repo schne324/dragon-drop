@@ -193,8 +193,8 @@ var DragonDrop = function () {
           break;
         case 27:
           if (isDrag()) {
-            target.click();
             this.cancel();
+            target.click();
           }
       }
     }
@@ -268,7 +268,11 @@ var DragonDrop = function () {
   return DragonDrop;
 }();
 
+// make window.DragonDrop available rather than window.DragonDrop.default
+
+
 exports.default = DragonDrop;
+module.exports = DragonDrop;
 
 },{"./lib/defaults":2,"./lib/query-all":3,"component-emitter":5,"debug":11,"dragula":14,"live-region":16,"merge-options":17}],2:[function(require,module,exports){
 'use strict';
