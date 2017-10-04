@@ -129,9 +129,7 @@ var DragonDrop = function () {
       this.draggers.forEach(function (dragger, i) {
         dragger.tabIndex = 0; // ensure it is focusable
         dragger.setAttribute('role', 'button');
-        // TODO: if we're using a live region, should these attrs be omitted?
-        dragger.setAttribute('aria-grabbed', 'false');
-        dragger.setAttribute('aria-dropeffect', 'move');
+
         // events
         dragger.addEventListener('keydown', _this.onKeydown.bind(_this));
         dragger.addEventListener('click', function () {

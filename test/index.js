@@ -1,5 +1,6 @@
 import 'jsdom-global/register';
 import test from 'tape';
+import simulant, { fire } from 'simulant';
 import DragonDrop from '../';
 import defaults from '../lib/defaults';
 import queryAll from '../lib/query-all';
@@ -83,14 +84,131 @@ test('toggles aria-pressed/data-drag-on attributes when a dragger is clicked', t
   item.click(); // toggle it back off
 });
 
-// test('dropped/grabbed announcement when a dragger is clicked');
-// test('clicks dragger when ENTER is pressed');
-// test('clicks dragger when SPACE is pressed');
-// test('properly moves item up when LEFT or UP is pressed and dragger is pressed');
-// test('properly moves item down when DOWN or RIGHT is pressed and dragger is pressed');
-// test('does nothing when arrow keys are pressed and dragger is not pressed');
-// test('drops the item when tab is pressed');
-// test('cancels reorder and restores list to initial order');
+test('dropped/grabbed announcement when a dragger is clicked', t => {
+  t.plan(1);
+  // clean up from previous tests
+  ddWithDragger.liveRegion.region.innerHTML = '';
+  // click the dragger
+  const dragger = ddWithDragger.draggers[0];
+  dragger.click();
+
+  t.equal(ddWithDragger.liveRegion.region.lastChild.innerHTML, '1 was grabbed');
+  dragger.click();
+});
+
+test('clicks dragger when ENTER is pressed', t => {
+  t.plan(1);
+
+  const item = ddWithoutDragger.items[1];
+  const onItemClick = () => {
+    item.removeEventListener('click', onItemClick);
+    item.click(); // unpress it
+    t.pass();
+  };
+  item.addEventListener('click', onItemClick);
+
+  const e = simulant('keydown', { which: 13 });
+  fire(item, e);
+
+});
+
+test('clicks dragger when SPACE is pressed', t => {
+  t.plan(1);
+
+  const item = ddWithoutDragger.items[1];
+  const onItemClick = () => {
+    item.removeEventListener('click', onItemClick);
+    item.click(); // unpress it
+    t.pass();
+  };
+  item.addEventListener('click', onItemClick);
+
+  const e = simulant('keydown', { which: 32 });
+  fire(item, e);
+});
+
+test('properly moves item up when LEFT or UP is pressed and dragger is pressed', t => {
+  t.plan(2);
+
+  const item = ddWithoutDragger.items[2];
+  // "press" the item
+  item.click();
+  const firstKeydown = simulant('keydown', { which: 37 });
+  // fire the left keydown
+  fire(item, firstKeydown);
+
+  const itemsAfterLeft = queryAll('li', ddWithoutDragger.container);
+  t.is(itemsAfterLeft.indexOf(item), 1);
+
+  const secondKeydown = simulant('keydown', { which: 38 });
+  // fire the up keydown
+  fire(item, secondKeydown);
+
+  const itemsAfterUp = queryAll('li', ddWithoutDragger.container);
+  item.click(); // unpress it
+  t.is(itemsAfterUp.indexOf(item), 0);
+});
+
+test('properly moves item down when DOWN or RIGHT is pressed and dragger is pressed', t => {
+  t.plan(2);
+
+  const item = ddWithDragger.draggers[0];
+  // "press" the item
+  item.click();
+  const firstKeydown = simulant('keydown', { which: 40 });
+  // fire the down keydown
+  fire(item, firstKeydown);
+
+  const itemsAfterDown = queryAll('button', ddWithDragger.container);
+  t.is(itemsAfterDown.indexOf(item), 1);
+
+  const secondKeydown = simulant('keydown', { which: 39 });
+  // fire the right keydown
+  fire(item, secondKeydown);
+
+  const itemsAfterRight = queryAll('button', ddWithDragger.container);
+  item.click(); // unpress it
+  t.is(itemsAfterRight.indexOf(item), 2);
+});
+
+test('does nothing when arrow keys are pressed and dragger is not pressed', t => {
+  t.plan(2);
+
+  const item = ddWithDragger.draggers[2];
+  t.true(item.getAttribute('data-drag-on') !== 'true');
+
+  const e = simulant('keydown', { which: 38 });
+  fire(item, e);
+  const items = queryAll('button', ddWithDragger.container);
+  t.is(items.indexOf(item), 2);
+});
+
+test('drops the item when tab is pressed', t => {
+  t.plan(2);
+
+  const item = ddWithoutDragger.draggers[0];
+  item.click(); // press it
+  t.is(item.getAttribute('aria-pressed'), 'true');
+  item.click(); // unpress it
+  t.is(item.getAttribute('aria-pressed'), 'false');
+});
+
+test('cancels reorder and restores list to initial order when escape is pressed', t => {
+  t.plan(3);
+
+  const item = ddWithDragger.draggers[0];
+  item.click(); // press it
+
+  const e = simulant('keydown', { which: 40 }); // down
+
+  fire(item, e);
+  t.is(queryAll('button', ddWithDragger.container).indexOf(item), 1);
+
+  const event = simulant('keydown', { which: 27 });
+  fire(item, event);
+  t.is(queryAll('button', ddWithDragger.container).indexOf(item), 0);
+  t.is(item.getAttribute('aria-pressed'), 'false');
+});
 
 test('teardown', t => {
   fixture.destroy();

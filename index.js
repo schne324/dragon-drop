@@ -80,7 +80,6 @@ export default class DragonDrop {
     this.setItems();
 
     // set all attrs/props/events on dragger elements
-    // TODO: Test AT support for aria-grabbed ('false') and aria-dropeffect ('move')
     this.draggers.forEach((dragger, i) => {
       dragger.tabIndex = 0; // ensure it is focusable
       dragger.setAttribute('role', 'button');

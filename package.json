@@ -4,11 +4,11 @@
   "description": "Drag and/or drop",
   "main": "dist/dragon-drop.js",
   "scripts": {
-    "build": "npm run pre-build && npm run build:normal && npm run build:min",
-    "build:normal": "browserify index.js -o dist/dragon-drop.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
-    "build:min": "browserify -g uglifyify index.js -o dist/dragon-drop.min.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
-    "dev": "watchify index.js -o dist/dragon-drop.js --verbose --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
+    "build": "npm run pre-build && npm run bundle && npm run bundle:min",
+    "bundle": "browserify index.js -o dist/dragon-drop.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
+    "bundle:min": "browserify -g uglifyify index.js -o dist/dragon-drop.min.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
     "clean": "rm -rf dist/",
+    "dev": "watchify index.js -o dist/dragon-drop.js --verbose --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
     "pre-build": "npm run clean && mkdir dist",
     "test": "babel-tape-runner test/index.js | faucet"
   },
@@ -34,6 +34,7 @@
     "jsdom": "^11.2.0",
     "jsdom-global": "^3.0.2",
     "merge-options": "^1.0.0",
+    "simulant": "^0.2.2",
     "tape": "^4.8.0",
     "uglifyify": "^4.0.3",
     "watchify": "^3.9.0"
