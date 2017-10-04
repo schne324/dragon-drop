@@ -133,6 +133,8 @@ var DragonDrop = function () {
       this.container = container;
       this.setItems();
 
+      var cachedItems = this.items;
+
       // set all attrs/props/events on dragger elements
       this.draggers.forEach(function (dragger, i) {
         dragger.tabIndex = 0; // ensure it is focusable
@@ -145,7 +147,8 @@ var DragonDrop = function () {
 
           dragger.setAttribute('aria-pressed', '' + !wasPressed);
           dragger.setAttribute('data-drag-on', '' + !wasPressed);
-          _this.announcement(wasPressed ? 'dropped' : 'grabbed', _this.items[i]);
+
+          _this.announcement(wasPressed ? 'dropped' : 'grabbed', cachedItems[i]);
           // configure classes (active and inactive)
           _this.items.forEach(function (item) {
             var method = !wasPressed ? 'add' : 'remove';

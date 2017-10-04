@@ -89,6 +89,8 @@ export default class DragonDrop {
     this.container = container;
     this.setItems();
 
+    const cachedItems = this.items;
+
     // set all attrs/props/events on dragger elements
     this.draggers.forEach((dragger, i) => {
       dragger.tabIndex = 0; // ensure it is focusable
@@ -101,7 +103,8 @@ export default class DragonDrop {
 
         dragger.setAttribute('aria-pressed', `${!wasPressed}`);
         dragger.setAttribute('data-drag-on', `${!wasPressed}`);
-        this.announcement(wasPressed ? 'dropped' : 'grabbed', this.items[i]);
+
+        this.announcement(wasPressed ? 'dropped' : 'grabbed', cachedItems[i]);
         // configure classes (active and inactive)
         this.items.forEach(item => {
           const method = !wasPressed ? 'add' : 'remove';
