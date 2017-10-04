@@ -4,8 +4,6 @@
  * (function))...if handle is provided, configure this
  *
  * - rename (or maybe just alias) "dragger" to "handle"
- *
- * - dragging with mouse then with keyboard is buggy - update arrays on drag end of mouse
  */
 
 import dragula from 'dragula';
@@ -190,7 +188,7 @@ export default class DragonDrop {
     const config = this.options.announcement || {};
     const funk = config[type];
 
-    if (funk) {
+    if (funk && typeof funk === 'function') {
       const msg = funk(item, this.items);
       this.liveRegion.announce(msg, 5e3);
     }
@@ -203,6 +201,7 @@ export default class DragonDrop {
 
     this.dragula.on('drop', el => {
       this.announcement('dropped', el);
+      this.setItems();
     });
   }
 

@@ -5,7 +5,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * TODO:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - Dragula supports handles (the "move" option
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * (function))...if handle is provided, configure this
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - rename (or maybe just alias) "dragger" to "handle"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
 var _dragula = require('dragula');
 
@@ -73,6 +79,8 @@ var DragonDrop = function () {
    *                                           are passed as arguments respectively. The function
    *                                           should return a string of text to be announced in
    *                                           the live region.
+   * @option {Function} announcement.cancel - The function called when the reorder is cancelled
+   *                                          (via ESC). No arguments passed in.
    */
   function DragonDrop(container, userOptions) {
     _classCallCheck(this, DragonDrop);
@@ -231,7 +239,7 @@ var DragonDrop = function () {
       var config = this.options.announcement || {};
       var funk = config[type];
 
-      if (funk) {
+      if (funk && typeof funk === 'function') {
         var msg = funk(item, this.items);
         this.liveRegion.announce(msg, 5e3);
       }
@@ -247,6 +255,7 @@ var DragonDrop = function () {
 
       this.dragula.on('drop', function (el) {
         _this2.announcement('dropped', el);
+        _this2.setItems();
       });
     }
   }, {
@@ -262,6 +271,7 @@ var DragonDrop = function () {
       });
       this.items = this.cachedItems;
       focused.focus();
+      this.announcement('cancel');
     }
   }]);
 
@@ -296,7 +306,8 @@ var defaults = {
       var pos = items.indexOf(el) + 1;
       var text = el.innerText;
       return 'The list has been reordered, ' + text + ' is now item ' + pos + ' of ' + items.length;
-    }
+    },
+    cancel: 'Reordering cancelled'
   }
 };
 

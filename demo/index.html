@@ -266,7 +266,7 @@
             const text = el.querySelector('span').innerText;
             return `The rankings have been updated, ${text} is now ranked #${pos} of ${items.length}`;
           },
-          cancel: 'Reranking cancelled.'
+          cancel: () => 'Reranking cancelled.'
         }
       });
 
@@ -280,7 +280,7 @@
             const text = el.querySelector('div').innerText;
             return `The schedule has changed, ${text} is now item ${pos} of ${items.length}`;
           },
-          cancel: 'Reschedule cancelled.'
+          cancel: () => 'Reschedule cancelled.'
         }
       });
 
