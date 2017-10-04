@@ -9,6 +9,7 @@
     "bundle:min": "browserify -g uglifyify index.js -o dist/dragon-drop.min.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
     "clean": "rm -rf dist/",
     "demo": "mkdir dist/demo && cp-dir ./demo ./dist/demo",
+    "deploy": "gh-pages -d dist/",
     "dev": "watchify index.js -o dist/dragon-drop.js --verbose --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
     "pre-build": "npm run clean && mkdir dist",
     "test": "babel-tape-runner test/index.js | faucet"
@@ -32,6 +33,7 @@
     "debug": "^3.0.0",
     "dragula": "^3.7.2",
     "faucet": "0.0.1",
+    "gh-pages": "^1.0.0",
     "jsdom": "^11.2.0",
     "jsdom-global": "^3.0.2",
     "merge-options": "^1.0.0",
