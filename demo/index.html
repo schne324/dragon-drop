@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Dragon Drop</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=MedievalSharp|Roboto">
+    <link rel="stylesheet" href="https://unpkg.com/rainbow-code/themes/css/monokai.css">
+    <link href="https://use.fontawesome.com/2c7f755026.css" media="all" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+    <style>
+      body {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+      }
+
+      h1 {
+        font-family: 'MedievalSharp', cursive;
+        font-size: 5em;
+        text-align: center;
+      }
+
+      header {
+        background: #eee;
+        color: #000;
+        padding: 10px;
+        text-align: center;
+      }
+
+      [aria-pressed="true"] {
+        box-shadow: inset 0 0 10px #000 !important;
+      }
+
+      .demo > li.dragon-inactive {
+        box-shadow: 0 0 1px #000;
+        border-color: transparent;
+      }
+
+      .demo {
+        text-align: center;
+        margin: 0;
+        padding: 0 20px;
+      }
+
+      .demo > li {
+        margin: 15px auto;
+        padding: 5px;
+        border: 1px solid;
+        text-align: left;
+        list-style: inherit;
+      }
+
+      .handle {
+        margin-right: 10px;
+        border: 0;
+        background: #fff;
+        border-radius: 2px;
+        box-shadow: 0 0 1px #000;
+        padding: 5px;
+      }
+
+      #demo-2 {
+        margin: 0;
+        padding: 0;
+      }
+
+      #demo-2 li {
+        padding: 10px;
+        border-bottom: 2px solid;
+      }
+
+      #demo-2 li::before {
+        display: block;
+        font-size: 10px;
+        margin-right: 10px;
+        font-style: italic;
+      }
+
+      #demo-2 li:nth-of-type(1)::before {
+        content: '9:30am';
+      }
+
+      #demo-2 li:nth-of-type(2)::before {
+        content: '10:30am';
+      }
+
+      #demo-2 li:nth-of-type(3)::before {
+        content: '11:30am';
+      }
+
+      #demo-2 li:nth-of-type(4)::before {
+        content: '1:30pm';
+      }
+
+      #demo-2 li:nth-of-type(5)::before {
+        content: '4:00pm';
+      }
+
+      p {
+        font-style: italic;
+      }
+
+      h2 {
+        font-size: 2em;
+        border-bottom: 1px solid;
+      }
+
+      .offscreen {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(1px 1px 1px 1px);
+        clip: rect(1px, 1px, 1px, 1px);
+      }
+
+      .dragon-active {
+        box-shadow: 0 0 8px #000;
+      }
+
+      pre {
+        overflow-y: auto;
+      }
+
+      .show {
+        position: fixed;
+        bottom: 0;
+        width: 45%;
+        height: 100px;
+        overflow: auto;
+        color: #fff;
+        background: #000;
+        padding: 5px;
+      }
+
+      .show:nth-of-type(1) {
+        left: 0;
+      }
+
+      .show:nth-last-of-type(1)::before {
+        content: 'Live Region';
+      }
+
+      .show:nth-of-type(2) {
+        right: 0;
+      }
+
+      .show:nth-last-of-type(2)::before {
+        content: 'Live Region';
+      }
+
+      .show::before {
+        text-decoration: underline;
+        font-weight: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>DRAGON DROP</h1>
+      <div>Fully keyboard/AT accessible drag-and-drop list reordering plugin.</div>
+    </header>
+    <p id="global-help">Activate the reorder button and use the arrow keys to reorder the list or use your mouse to drag/reorder.  Press escape to cancel the reordering.</p>
+    <div>
+      <input type="checkbox" id="display-region" />
+      <label for="display-region">Display live regions (offscreen by default)</label>
+    </div>
+    <section>
+      <h2 id="bands-head">Rank the bands</h2>
+      <h3>With drag handle</h3>
+      <p>Works with ordered lists</p>
+      <ol class="demo" id="demo-1" aria-labelledby="bands-head">
+        <li>
+          <button aria-describedby="global-help" type="button" class="fa fa-bars handle" aria-labelledby="band-button-1 band-text-1" id="band-button-1">
+            <div class="offscreen">Reorder</div>
+          </button>
+          <span id="band-text-1">Frank Zappa</span>
+        </li>
+        <li>
+          <button aria-describedby="global-help" type="button" class="fa fa-bars handle" aria-labelledby="band-button-2 band-text-2" id="band-button-2">
+            <div class="offscreen">Reorder</div>
+          </button>
+          <span id="band-text-2">Ween</span>
+        </li>
+        <li>
+          <button aria-describedby="global-help" type="button" class="fa fa-bars handle" aria-labelledby="band-button-3 band-text-3" id="band-button-3">
+            <div class="offscreen">Reorder</div>
+          </button>
+          <span id="band-text-3">Leftover Salmon</span>
+        </li>
+        <li>
+          <button aria-describedby="global-help" type="button" class="fa fa-bars handle" aria-labelledby="band-button-4 band-text-4" id="band-button-4">
+            <div class="offscreen">Reorder</div>
+          </button>
+          <span id="band-text-4">Phish</span>
+        </li>
+        <li>
+          <button aria-describedby="global-help" type="button" class="fa fa-bars handle" aria-labelledby="band-button-5 band-text-5" id="band-button-5">
+            <div class="offscreen">Reorder</div>
+          </button>
+          <span id="band-text-5">Moe.</span>
+        </li>
+      </ol>
+      <pre>
+        <code data-language="js">
+  import DragonDrop from 'drag-on-drop';
+
+  const demo1 = document.getElementById('demo-1');
+  const dragonDrop = new DragonDrop(demo1, {
+    dragger: '.handle',
+    announcement: {
+      grabbed: el => `${el.querySelector('span').innerText} grabbed`,
+      dropped: el => `${el.querySelector('span').innerText} dropped`,
+      reorder: (el, items) => {
+        const pos = items.indexOf(el) + 1;
+        const text = el.querySelector('span').innerText;
+        return `The rankings have been updated, ${text} is now ranked #${pos} out of ${items.length}`;
+      },
+      cancel: 'Reranking cancelled.'
+    }
+  });
+        </code>
+      </pre>
+    </section>
+    <section>
+      <h2 id="schedule-head">Today's schedule</h2>
+      <h3>Without drag handle</h3>
+      <p>Entire item is draggable (including with the keyboard!)</p>
+      <ul id="demo-2" aria-labelledby="schedule-head">
+        <li><span class="offscreen">Reorder</span><div>Standup (status call)</div></li>
+        <li><span class="offscreen">Reorder</span><div>Sprint planning</div></li>
+        <li><span class="offscreen">Reorder</span><div>Retrospective</div></li>
+        <li><span class="offscreen">Reorder</span><div>Backlog grooming</div></li>
+        <li><span class="offscreen">Reorder</span><div>End of sprint demo</div></li>
+      </ul>
+      <pre>
+        <code data-language="js">
+  import DragonDrop from 'dragon-drop';
+
+  const demo2 = document.getElementById('demo-2');
+  new DragonDrop(demo2, {
+    dragger: false,
+    announcement: {
+      grabbed: el => `${el.querySelector('div').innerText} grabbed`,
+      dropped: el => `${el.querySelector('div').innerText} dropped`,
+      reorder: (el, items) => {
+        const pos = items.indexOf(el) + 1;
+        const text = el.querySelector('div').innerText;
+        return `The schedule has changed, ${text} is now item ${pos} of ${items.length}`;
+      },
+      cancel: 'Reschedule cancelled.'
+    }
+  });
+        </code>
+      </pre>
+    </section>
+    <script src="https://unpkg.com/rainbow-code/dist/rainbow.min.js"></script>
+    <script src="../dragon-drop.js"></script>
+    <script>
+      const demo1 = new DragonDrop(document.getElementById('demo-1'), {
+        dragger: '.handle',
+        announcement: {
+          grabbed: el => `${el.querySelector('span').innerText} grabbed`,
+          dropped: el => `${el.querySelector('span').innerText} dropped`,
+          reorder: (el, items) => {
+            const pos = items.indexOf(el) + 1;
+            const text = el.querySelector('span').innerText;
+            return `The rankings have been updated, ${text} is now ranked #${pos} of ${items.length}`;
+          },
+          cancel: () => 'Reranking cancelled.'
+        }
+      });
+
+      const demo2 = new DragonDrop(document.getElementById('demo-2'), {
+        dragger: false,
+        announcement: {
+          grabbed: el => `${el.querySelector('div').innerText} grabbed`,
+          dropped: el => `${el.querySelector('div').innerText} dropped`,
+          reorder: (el, items) => {
+            const pos = items.indexOf(el) + 1;
+            const text = el.querySelector('div').innerText;
+            return `The schedule has changed, ${text} is now item ${pos} of ${items.length}`;
+          },
+          cancel: () => 'Reschedule cancelled.'
+        }
+      });
+
+      const regions = [demo1.liveRegion.region, demo2.liveRegion.region];
+      const checkbox = document.getElementById('display-region');
+
+      regions.forEach(r => {
+        r.style = '';
+        r.classList.add('offscreen');
+      });
+
+      checkbox.addEventListener('change', () => {
+        regions.forEach(region => {
+          region.classList.toggle('show');
+          region.classList.toggle('offscreen');
+        });
+      });
+    </script>
+  </body>
+</html>
