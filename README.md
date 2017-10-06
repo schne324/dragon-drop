@@ -1,89 +1,132 @@
-# dragon-drop
-Keyboard accessible drag and drop reorder list
+# Dragon Drop
+Keyboard accessible drag-and-drop reorder list
 
 ## Installation
 
 ## npm
-`npm install drag-on-drop`
+```bash
+$ npm install drag-on-drop
+```
 
 ### bower
-`bower install drag-on-drop`
+```bash
+$ bower install drag-on-drop
+```
 
-### git
-`git clone https://github.com/schne324/dragon-drop.git`
+## Usage
 
-`cd dragon-drop`
+### `new DragonDrop(container, [options])`
 
-`npm i`
+### Browserify/Webpack
 
-`bower i`
+```js
+import DragonDrop from 'drag-on-drop';
 
-`open example/example.html`
+const dragon = new DragonDrop(container, options);
+```
 
-## Options
-- `itemSelector` _(required)_: the selector for the actual items to be reordered (defaults to `'li'`).  This will be qualified within `this` (the container calling dragonDrop).
-- `dragSelector` _(optional)_: the selector for the "handle" if applicable (defaults to `'.dragon'`). This is qualified within the `itemSelector` elements.
-- `activeClass` _(optional)_: the class to be added to an actively dragging item - keyboard only (defaults to `'drag-on'`.
-- `inactiveClass` _(optional)_: the class to be added to other items when an item is actively dragging
-- `onChange` _(optional)_: a function that is invoked whenever a keyboard or mouse reorder has taken place.  The function accepts two arguments: `$item` which is a jquery reference to the newly dropped item, and `$items` which is a query collection of the entire list. `this` is also made available within the callback.
-- `mouseDrag` _(optional)_: ANY sortable options the user wishes to pass through - https://github.com/voidberg/html5sortable#options - (the `placeholder` option defaults to `'dragon-placeholder'`).
-- `announcement` _(optional)_: configuration object for the live region announcement
-	- `textSelector` _(optional)_: the selector for element of which to grab text from. If not provided, will default to the text of the given item (defaults to `null`).
- 	- `grab` _(optional)_: the desired readout for when an item is 'grabbed' (defaults to `'$1 grabbed'`). You may use:
- 		- `'$1'` (the item's text)
- 		- `'$2'` (the position within the list of the newly grabbed item)
- 		- `'$3'` (the total number of items in the list)
- 	- `drop` _(optional)_: the desired readout for when an item is 'dropped' (defaults to `'$1 dropped'`). You may use:
- 		- `'$1'` (the item's text)
- 		- `'$2'` (the position within the list of the newly dropped item)
- 		- `'$3'` (the total number of items in the list)
- 	- `reorder` _(optional)_: the desired readout for when the list is 'reordered' (defaults to `'The list has been reordered. $1 is now item $2 of $3'`). You may use:
- 		- `'$1'` (the newly moved item's text)
- 		- `'$2'` (the position within the list of the newly moved item)
- 		- `'$3'` (the total number of items in the list)
+### In the browser
+
+```js
+const DragonDrop = window.DragonDrop;
+const dragon = new DragonDrop(container, options);
+```
+
+## API
+
+### `container` (required)
+The one and only required parameter is the list HTMLElement that contains the sortable items.
+
+### Options _Object_ (optional)
+
+#### `item` _String_
+The selector for the drag items (qualified within container). Defaults to
+```js
+'li'
+```
+
+#### `dragger` _String_
+The selector for the keyboard dragger. If set to `false`, the entire item will be used as the dragger. Defaults to 
+```ks
+'button'
+```
+
+#### `activeClass` _String_
+The class to be added to the item being dragged. Defaults to 
+```js
+'dragon-active'
+```
+
+#### `inactiveClass` _String_
+The class to be added to all of the other items when an item is being dragged. Defaults
+```js
+'dragon-inactive'
+```
+
+#### `announcement` _Object_
+The live region announcement configuration object containing the following properties:
+
+##### `grabbed` _Function_
+The function called when an item is picked up. The currently grabbed element along with an array of all items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
+```js
+el => `Item ${el.innerText} grabbed`
+```
+
+##### `dropped` _Function_
+The function called when an item is dropped. The newly dropped item along with an array of all items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
+```js
+el => `Item ${el.innerText} dropped`
+```
+
+##### `reorder` _Function_
+The function called when the list has been reordered. The newly dropped item along with an array of items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
+```js
+(el, items) => {
+  const pos = items.indexOf(el) + 1;
+  const text = el.innerText;
+  return `The list has been reordered, ${text} is now item ${pos} of ${items.length}`;
+}
+```
+
+##### `cancel` _Function_
+The function called when the reorder is cancelled (via ESC). No arguments passed in. Defaults to
+```js
+() => 'Reordering cancelled'
+```
+
+## Properties
+```js
+const dragonDrop = new DragonDrop(container);
+```
+### `dragonDrop.items` _Array_
+An array of each of the sortable item element references.
+
+### `dragonDrop.draggers` _Array_
+An array of each of the dragger item element references. If instance doesn't have draggers, this will be identical to `dragonDrop.items`.
+
+## Events
+
+### `dragonDrop.on('change', callback)`
+The `"change"` event is fired whenever the list is reordered.
 
 ## Example
-given the following html...
-```html
-<ul class="reorder-list">
-	<li class="reorderme">
-		<span class="item-text">1</span>
-		<button class="reorder-handle">reorder</button>
-	</li>
-	<li class="reorderme">
-		<span class="item-text">2</span>
-		<button class="reorder-handle">reorder</button>
-	</li>
-	<li class="reorderme">
-		<span class="item-text">3</span>
-		<button class="reorder-handle">reorder</button>
-	</li>
-</ul>
-```
 
-and the following js...
 ```js
-$('.reorder-list').dragonDrop({
-	itemSelector: 'li.reorderme',
-	dragSelector: 'button.reorder-handle',
-	activeClass: 'active',
-	onChange: function ($item, $items) {
-		alert($item.text() + ' has been dropped!');
-	},
-	mouseDrag: {placeholderClass: 'foo-placeholder'},
-	announcement: {
-		textSelector: '.item-text',
-		grab: 'the dragon has grabbed $1',
-		drop: 'the dragon has dropped $1',
-		reorder: 'The dragon has formed a new order... $1 is now item $2 of $3'
-	}
+const list = document.getElementById('dragon-list');
+const dragonDrop = new DragonDrop(list, {
+  item: 'li',
+  dragger: '.handle',
+  announcement: {
+    grabbed: el => `The dragon has grabbed ${el.innerText}`,
+    dropped: el => `The dragon has dropped ${el.innerText}`,
+    reorder: (el, items) => {
+      const pos = items.indexOf(el) + 1;
+      const text = el.innerText;
+      return `The dragon's list has been reordered, ${text} is now item ${pos} of ${items.length}`;
+    },
+    cancel: 'The dragon cancelled the reorder'
+  }
 });
+
+dragonDrop.on('change', () => console.log('list reordered!'));
 ```
-
-## Custom Examples
-First, run `npm install`, then `bower install` to ensure all the dependencies are installed.
-Then, you can edit the `example/example.jade` and the `example/styles.styl` files and run `gulp` to build the changes.
-(`gulp watch` is available to prevent you from executing `gulp` after each and every change)
-
-## Dependencies
-This plugin leverages the html5 sortable plugin https://github.com/voidberg/html5sortable and adds accessible/keyboard enhancements.
