@@ -2,6 +2,13 @@
  * TODO:
  * - Dragula supports handles (the "move" option
  * (function))...if handle is provided, configure this
+ *
+ * - Don't allow multiple items to be pressed -> when one is pressed, unpress the rest
+ *
+ * - Idea for mobile support: Press and item to pick it up (how it already works) and then
+ * click a different item to insert the item at that location
+ *    - may not be a great idea because it would have to be smart about placing the dropped item
+ *    before or after the target item.
  */
 
 import dragula from 'dragula';
@@ -200,13 +207,11 @@ export default class DragonDrop {
   mouseEvents() {
     this.dragula.on('drag', el => {
       this.announcement('grabbed', el);
-      this.emit('grabbed', el);
     });
 
     this.dragula.on('drop', el => {
       this.announcement('dropped', el);
       this.setItems();
-      this.emit('dropped', el);
     });
   }
 

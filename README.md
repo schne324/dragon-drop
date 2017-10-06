@@ -145,3 +145,11 @@ dragonDrop
   .on('reorder', (container, item) => console.log(`Reorder: ${item.innerText} has moved`))
   .on('cancel', () => console.log('Reordering cancelled'));
 ```
+
+**NOTE** for mouse drag/drop event hooks the `dragula` property is exposed for dragula's events
+```js
+dragonDrop.dragula.on('drop', ...);
+```
+
+## Thanks!
+A special thanks to contributors/maintainers of [dragula](https://github.com/bevacqua/dragula) which is used for all of the mouse behavior/interaction for dragon drop!

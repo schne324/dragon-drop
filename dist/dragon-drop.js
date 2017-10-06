@@ -254,13 +254,11 @@ var DragonDrop = function () {
 
       this.dragula.on('drag', function (el) {
         _this2.announcement('grabbed', el);
-        _this2.emit('grabbed', el);
       });
 
       this.dragula.on('drop', function (el) {
         _this2.announcement('dropped', el);
         _this2.setItems();
-        _this2.emit('dropped', el);
       });
     }
   }, {
