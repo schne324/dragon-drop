@@ -271,9 +271,9 @@
       });
 
       demo1
-        .on('grabbed', (container, item) => console.log(`grabbed`))
-        .on('dropped', (container, item) => console.log(`Item ${item.innerText} dropped`))
-        .on('reorder', (container, item) => console.log(`Reorder: ${item.innerText} has moved`))
+        .on('grabbed', (container, item) => console.log('grabbed: ', item))
+        .on('dropped', (container, item) => console.log('dropped: ', item))
+        .on('reorder', (container, item) => console.log('reorder: ', item))
         .on('cancel', () => console.log('Reordering cancelled'));
 
       const demo2 = new DragonDrop(document.getElementById('demo-2'), {
