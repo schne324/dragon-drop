@@ -15,8 +15,6 @@ $ bower install drag-on-drop
 
 ## Usage
 
-### `new DragonDrop(container, [options])`
-
 ### Browserify/Webpack
 
 ```js
@@ -34,51 +32,53 @@ const dragon = new DragonDrop(container, options);
 
 ## API
 
-### `container` (required)
+### `new DragonDrop(container, [options])`
+
+#### `container` (required)
 The one and only required parameter is the list HTMLElement that contains the sortable items.
 
-### Options _Object_ (optional)
+#### Options _Object_ (optional)
 
-#### `item` _String_
+##### `item` _String_
 The selector for the drag items (qualified within container). Defaults to
 ```js
 'li'
 ```
 
-#### `dragger` _String_
+##### `dragger` _String_
 The selector for the keyboard dragger. If set to `false`, the entire item will be used as the dragger. Defaults to 
 ```ks
 'button'
 ```
 
-#### `activeClass` _String_
+##### `activeClass` _String_
 The class to be added to the item being dragged. Defaults to 
 ```js
 'dragon-active'
 ```
 
-#### `inactiveClass` _String_
+##### `inactiveClass` _String_
 The class to be added to all of the other items when an item is being dragged. Defaults
 ```js
 'dragon-inactive'
 ```
 
-#### `announcement` _Object_
+##### `announcement` _Object_
 The live region announcement configuration object containing the following properties:
 
-##### `grabbed` _Function_
+###### `grabbed` _Function_
 The function called when an item is picked up. The currently grabbed element along with an array of all items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
 ```js
 el => `Item ${el.innerText} grabbed`
 ```
 
-##### `dropped` _Function_
+###### `dropped` _Function_
 The function called when an item is dropped. The newly dropped item along with an array of all items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
 ```js
 el => `Item ${el.innerText} dropped`
 ```
 
-##### `reorder` _Function_
+###### `reorder` _Function_
 The function called when the list has been reordered. The newly dropped item along with an array of items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
 ```js
 (el, items) => {
@@ -88,7 +88,7 @@ The function called when the list has been reordered. The newly dropped item alo
 }
 ```
 
-##### `cancel` _Function_
+###### `cancel` _Function_
 The function called when the reorder is cancelled (via ESC). No arguments passed in. Defaults to
 ```js
 () => 'Reordering cancelled'
