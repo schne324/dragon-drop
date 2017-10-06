@@ -46,13 +46,13 @@ The selector for the drag items (qualified within container). Defaults to
 ```
 
 ##### `dragger` _String_
-The selector for the keyboard dragger. If set to `false`, the entire item will be used as the dragger. Defaults to 
+The selector for the keyboard dragger. If set to `false`, the entire item will be used as the dragger. Defaults to
 ```ks
 'button'
 ```
 
 ##### `activeClass` _String_
-The class to be added to the item being dragged. Defaults to 
+The class to be added to the item being dragged. Defaults to
 ```js
 'dragon-active'
 ```
@@ -104,12 +104,7 @@ An array of each of the sortable item element references.
 ### `dragonDrop.draggers` _Array_
 An array of each of the dragger item element references. If instance doesn't have draggers, this will be identical to `dragonDrop.items`.
 
-## Events
-
-### `dragonDrop.on('change', callback)`
-The `"change"` event is fired whenever the list is reordered.
-
-## Example
+### Example with options
 
 ```js
 const list = document.getElementById('dragon-list');
@@ -127,6 +122,26 @@ const dragonDrop = new DragonDrop(list, {
     cancel: 'The dragon cancelled the reorder'
   }
 });
+```
 
-dragonDrop.on('change', () => console.log('list reordered!'));
+## Events
+Dragon drop emit events when important stuff happens.
+
+### `dragonDrop.on('grabbed', callback)`
+Fires when an item is grabbed (with keyboard or mouse). The callback is passed the container along with the grabbed item.
+
+### `dragonDrop.on('dropped', callback)`
+Fires when an item is dropped (with keyboard or mouse). The callback is passed the container and the grabbed item.
+
+### `dragonDrop.on('reorder', callback)`
+Fires when an list is reordered. The callback is passed the container along with the item.
+
+### Example use of events
+
+```js
+dragonDrop
+  .on('grabbed', (container, item) => console.log(`Item ${item.innerText} grabbed`))
+  .on('dropped', (container, item) => console.log(`Item ${item.innerText} dropped`))
+  .on('reorder', (container, item) => console.log(`Reorder: ${item.innerText} has moved`))
+  .on('cancel', () => console.log('Reordering cancelled'));
 ```

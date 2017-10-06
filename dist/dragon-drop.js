@@ -9,8 +9,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * TODO:
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * - Dragula supports handles (the "move" option
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * (function))...if handle is provided, configure this
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - rename (or maybe just alias) "dragger" to "handle"
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
 var _dragula = require('dragula');
@@ -55,8 +53,8 @@ var DragonDrop = function () {
    *
    * @option {String} item - The selector for the drag items (qualified within
    *                         container). Defaults to `'li'`.
-   * @option {String} dragger - The selector for the keyboard dragger. If set to
-   *                            false, the entire item will be used as the dragger.
+   * @option {String} handle - The selector for the handle. If set to
+   *                            false, the entire item will be used as the draggable region.
    *                            Defaults to `'button'`.
    * @option {String} activeClass - The class to be added to the item being dragged.
    *                                Defaults to `'dragon-active'`.
@@ -135,24 +133,26 @@ var DragonDrop = function () {
 
       var cachedItems = this.items;
 
-      // set all attrs/props/events on dragger elements
-      this.draggers.forEach(function (dragger, i) {
-        dragger.tabIndex = 0; // ensure it is focusable
-        dragger.setAttribute('role', 'button');
+      // set all attrs/props/events on handle elements
+      this.handles.forEach(function (handle, i) {
+        handle.tabIndex = 0; // ensure it is focusable
+        handle.setAttribute('role', 'button');
 
         // events
-        dragger.addEventListener('keydown', _this.onKeydown.bind(_this));
-        dragger.addEventListener('click', function () {
-          var wasPressed = dragger.getAttribute('data-drag-on') === 'true';
+        handle.addEventListener('keydown', _this.onKeydown.bind(_this));
+        handle.addEventListener('click', function () {
+          var wasPressed = handle.getAttribute('data-drag-on') === 'true';
+          var type = wasPressed ? 'dropped' : 'grabbed';
 
-          dragger.setAttribute('aria-pressed', '' + !wasPressed);
-          dragger.setAttribute('data-drag-on', '' + !wasPressed);
+          handle.setAttribute('aria-pressed', '' + !wasPressed);
+          handle.setAttribute('data-drag-on', '' + !wasPressed);
 
-          _this.announcement(wasPressed ? 'dropped' : 'grabbed', cachedItems[i]);
+          _this.announcement(type, cachedItems[i]);
+          _this.emit(type, container, cachedItems[i]);
           // configure classes (active and inactive)
           _this.items.forEach(function (item) {
             var method = !wasPressed ? 'add' : 'remove';
-            var isTarget = item === dragger || item.contains(dragger);
+            var isTarget = item === handle || item.contains(handle);
 
             item.classList[isTarget && !wasPressed ? 'add' : 'remove'](activeClass);
             item.classList[isTarget && !wasPressed ? 'remove' : method](inactiveClass);
@@ -170,7 +170,7 @@ var DragonDrop = function () {
     value: function setItems() {
       var opts = this.options;
       this.items = (0, _queryAll2.default)(opts.item, this.container);
-      this.draggers = opts.dragger ? (0, _queryAll2.default)([opts.item, opts.dragger].join(' '), this.container) : this.items;
+      this.handles = opts.handle ? (0, _queryAll2.default)([opts.item, opts.handle].join(' '), this.container) : this.items;
     }
   }, {
     key: 'onKeydown',
@@ -212,12 +212,12 @@ var DragonDrop = function () {
   }, {
     key: 'arrow',
     value: function arrow(which, target) {
-      var draggers = this.draggers;
+      var handles = this.handles;
       var items = this.items;
       var isUp = which === 37 || which === 38;
-      var index = draggers.indexOf(target);
+      var index = handles.indexOf(target);
       var adjacentIndex = isUp ? index - 1 : index + 1;
-      var adjacentItem = draggers[adjacentIndex];
+      var adjacentItem = handles[adjacentIndex];
 
       if (!adjacentItem) {
         // prevents circularity
@@ -232,7 +232,7 @@ var DragonDrop = function () {
       target.focus();
       this.setItems();
 
-      this.emit('change', this.container, oldItem, newItem);
+      this.emit('reorder', this.container, oldItem);
       this.announcement('reorder', oldItem);
     }
   }, {
@@ -254,11 +254,13 @@ var DragonDrop = function () {
 
       this.dragula.on('drag', function (el) {
         _this2.announcement('grabbed', el);
+        _this2.emit('grabbed', el);
       });
 
       this.dragula.on('drop', function (el) {
         _this2.announcement('dropped', el);
         _this2.setItems();
+        _this2.emit('dropped', el);
       });
     }
   }, {
@@ -275,6 +277,7 @@ var DragonDrop = function () {
       this.items = this.cachedItems;
       focused.focus();
       this.announcement('cancel');
+      this.emit('cancel');
     }
   }]);
 
@@ -295,7 +298,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 var defaults = {
   item: 'li', // qualified within container
-  dragger: 'button', // qualified within `item`
+  handle: 'button', // qualified within `item`
   activeClass: 'dragon-active', // added to item being dragged
   inactiveClass: 'dragon-inactive', // added to other items when item is being dragged
   announcement: {

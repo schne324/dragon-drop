@@ -30,6 +30,7 @@
     "babelify": "^7.3.0",
     "browserify": "^14.4.0",
     "component-emitter": "^1.2.1",
+    "cp-dir": "^1.0.3",
     "debug": "^3.0.0",
     "dragula": "^3.7.2",
     "faucet": "0.0.1",

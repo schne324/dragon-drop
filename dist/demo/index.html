@@ -206,7 +206,7 @@
 
   const demo1 = document.getElementById('demo-1');
   const dragonDrop = new DragonDrop(demo1, {
-    dragger: '.handle',
+    handle: '.handle',
     announcement: {
       grabbed: el => `${el.querySelector('span').innerText} grabbed`,
       dropped: el => `${el.querySelector('span').innerText} dropped`,
@@ -238,7 +238,7 @@
 
   const demo2 = document.getElementById('demo-2');
   new DragonDrop(demo2, {
-    dragger: false,
+    handle: false,
     announcement: {
       grabbed: el => `${el.querySelector('div').innerText} grabbed`,
       dropped: el => `${el.querySelector('div').innerText} dropped`,
@@ -257,7 +257,7 @@
     <script src="../dragon-drop.js"></script>
     <script>
       const demo1 = new DragonDrop(document.getElementById('demo-1'), {
-        dragger: '.handle',
+        handle: '.handle',
         announcement: {
           grabbed: el => `${el.querySelector('span').innerText} grabbed`,
           dropped: el => `${el.querySelector('span').innerText} dropped`,
@@ -270,8 +270,14 @@
         }
       });
 
+      demo1
+        .on('grabbed', (container, item) => console.log(`grabbed`))
+        .on('dropped', (container, item) => console.log(`Item ${item.innerText} dropped`))
+        .on('reorder', (container, item) => console.log(`Reorder: ${item.innerText} has moved`))
+        .on('cancel', () => console.log('Reordering cancelled'));
+
       const demo2 = new DragonDrop(document.getElementById('demo-2'), {
-        dragger: false,
+        handle: false,
         announcement: {
           grabbed: el => `${el.querySelector('div').innerText} grabbed`,
           dropped: el => `${el.querySelector('div').innerText} dropped`,

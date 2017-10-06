@@ -20,7 +20,7 @@ const ddWithDragger = new DragonDrop(wd, {
 });
 const ddWithoutDragger = new DragonDrop(wod, {
   item: '.without-dragger-item',
-  dragger: false
+  handle: false
 });
 
 test('properly merges user options with defaults', t => {
@@ -29,10 +29,10 @@ test('properly merges user options with defaults', t => {
   testEl.innerHTML = '<span>The stuff</span>';
 
   const options = ddWithDragger.options;
-  const { dragger, inactiveClass, announcement } = defaults;
+  const { handle, inactiveClass, announcement } = defaults;
 
   t.is(options.item, '.with-dragger-item');
-  t.is(options.dragger, dragger);
+  t.is(options.handle, handle);
   t.is(options.activeClass, 'foo-active');
   t.is(options.inactiveClass, inactiveClass);
   t.is(options.announcement.grabbed(testEl), 'The stuff was grabbed');
@@ -49,17 +49,17 @@ test('properly sets element ref properties', t => {
   const draggers = queryAll('#with-dragger li button');
 
   t.deepEqual(ddWithDragger.items, items);
-  t.deepEqual(ddWithDragger.draggers, draggers);
+  t.deepEqual(ddWithDragger.handles, draggers);
 
   const woItems = queryAll('#without-dragger li');
 
   t.deepEqual(ddWithoutDragger.items, woItems);
-  t.deepEqual(ddWithoutDragger.draggers, woItems);
+  t.deepEqual(ddWithoutDragger.handles, woItems);
 });
 
 test('adds the right element attrs/props', t => {
   t.plan(2);
-  const count = ddWithDragger.draggers.length;
+  const count = ddWithDragger.handles.length;
   t.is(count, queryAll('button[tabindex="0"]', wd).length);
   t.is(count, queryAll('[role="button"]', wd).length);
 });
@@ -89,7 +89,7 @@ test('dropped/grabbed announcement when a dragger is clicked', t => {
   // clean up from previous tests
   ddWithDragger.liveRegion.region.innerHTML = '';
   // click the dragger
-  const dragger = ddWithDragger.draggers[0];
+  const dragger = ddWithDragger.handles[0];
   dragger.click();
 
   t.equal(ddWithDragger.liveRegion.region.lastChild.innerHTML, '1 was grabbed');
@@ -152,7 +152,7 @@ test('properly moves item up when LEFT or UP is pressed and dragger is pressed',
 test('properly moves item down when DOWN or RIGHT is pressed and dragger is pressed', t => {
   t.plan(2);
 
-  const item = ddWithDragger.draggers[0];
+  const item = ddWithDragger.handles[0];
   // "press" the item
   item.click();
   const firstKeydown = simulant('keydown', { which: 40 });
@@ -174,7 +174,7 @@ test('properly moves item down when DOWN or RIGHT is pressed and dragger is pres
 test('does nothing when arrow keys are pressed and dragger is not pressed', t => {
   t.plan(2);
 
-  const item = ddWithDragger.draggers[2];
+  const item = ddWithDragger.handles[2];
   t.true(item.getAttribute('data-drag-on') !== 'true');
 
   const e = simulant('keydown', { which: 38 });
@@ -186,7 +186,7 @@ test('does nothing when arrow keys are pressed and dragger is not pressed', t =>
 test('drops the item when tab is pressed', t => {
   t.plan(2);
 
-  const item = ddWithoutDragger.draggers[0];
+  const item = ddWithoutDragger.handles[0];
   item.click(); // press it
   t.is(item.getAttribute('aria-pressed'), 'true');
   item.click(); // unpress it
@@ -196,7 +196,7 @@ test('drops the item when tab is pressed', t => {
 test('cancels reorder and restores list to initial order when escape is pressed', t => {
   t.plan(3);
 
-  const item = ddWithDragger.draggers[0];
+  const item = ddWithDragger.handles[0];
   item.click(); // press it
 
   const e = simulant('keydown', { which: 40 }); // down
