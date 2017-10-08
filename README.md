@@ -37,7 +37,7 @@ const dragon = new DragonDrop(container, options);
 #### `container` (required)
 The one and only required parameter is the list HTMLElement that contains the sortable items.
 
-#### Options _Object_ (optional)
+#### `options` _Object_ (optional)
 
 ##### `item` _String_
 The selector for the drag items (qualified within container). Defaults to
