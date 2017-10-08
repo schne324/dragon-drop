@@ -104,7 +104,10 @@ export default class DragonDrop {
     // set all attrs/props/events on handle elements
     this.handles.forEach((handle, i) => {
       handle.tabIndex = 0; // ensure it is focusable
-      handle.setAttribute('role', 'button');
+
+      if (handle.tagName !== 'BUTTON') {
+        handle.setAttribute('role', 'button');
+      }
 
       // events
       handle.addEventListener('keydown', this.onKeydown.bind(this));

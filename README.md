@@ -45,8 +45,8 @@ The selector for the drag items (qualified within container). Defaults to
 'li'
 ```
 
-##### `dragger` _String_
-The selector for the keyboard dragger. If set to `false`, the entire item will be used as the dragger. Defaults to
+##### `handle` _String_
+The selector for the keyboard handle. If set to `false`, the entire item will be used as the handle. Defaults to
 ```ks
 'button'
 ```
@@ -101,8 +101,8 @@ const dragonDrop = new DragonDrop(container);
 ### `dragonDrop.items` _Array_
 An array of each of the sortable item element references.
 
-### `dragonDrop.draggers` _Array_
-An array of each of the dragger item element references. If instance doesn't have draggers, this will be identical to `dragonDrop.items`.
+### `dragonDrop.handles` _Array_
+An array of each of the handle item element references. If instance doesn't have handles, this will be identical to `dragonDrop.items`.
 
 ### Example with options
 
@@ -110,7 +110,7 @@ An array of each of the dragger item element references. If instance doesn't hav
 const list = document.getElementById('dragon-list');
 const dragonDrop = new DragonDrop(list, {
   item: 'li',
-  dragger: '.handle',
+  handle: '.handle',
   announcement: {
     grabbed: el => `The dragon has grabbed ${el.innerText}`,
     dropped: el => `The dragon has dropped ${el.innerText}`,

@@ -145,7 +145,10 @@ var DragonDrop = function () {
       // set all attrs/props/events on handle elements
       this.handles.forEach(function (handle, i) {
         handle.tabIndex = 0; // ensure it is focusable
-        handle.setAttribute('role', 'button');
+
+        if (handle.tagName !== 'BUTTON') {
+          handle.setAttribute('role', 'button');
+        }
 
         // events
         handle.addEventListener('keydown', _this.onKeydown.bind(_this));

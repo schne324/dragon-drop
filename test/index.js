@@ -71,7 +71,7 @@ test('adds the right element attrs/props', t => {
   t.plan(2);
   const count = ddWithDragger.handles.length;
   t.is(count, queryAll('button[tabindex="0"]', wd).length);
-  t.is(count, queryAll('[role="button"]', wd).length);
+  t.is(count, queryAll('button, [role="button"]', wd).length);
 });
 
 test('instantiates a new LiveRegion', t => {
