@@ -57,6 +57,16 @@ test('properly sets element ref properties', t => {
   t.deepEqual(ddWithoutDragger.handles, woItems);
 });
 
+test('methods are chainable', t => {
+  t.plan(1);
+
+  ddWithoutDragger
+    .on('foo', () => t.pass())
+    .announcement('foo')
+    .announcement('bar')
+    .emit('foo');
+});
+
 test('adds the right element attrs/props', t => {
   t.plan(2);
   const count = ddWithDragger.handles.length;
@@ -82,6 +92,21 @@ test('toggles aria-pressed/data-drag-on attributes when a dragger is clicked', t
   t.true(item.getAttribute('data-drag-on') === 'true');
 
   item.click(); // toggle it back off
+});
+
+test('only allows one (the most recently pressed) item to be pressed', t => {
+  t.plan(3);
+  const item1 = ddWithoutDragger.items[0];
+  const item2 = ddWithoutDragger.items[1];
+
+  item1.click();
+  t.true(item1.getAttribute('aria-pressed') === 'true');
+
+  item2.click();
+  t.false(item1.getAttribute('aria-pressed') === 'true');
+  t.true(item2.getAttribute('aria-pressed') === 'true');
+
+  item2.click(); // toggle it back off
 });
 
 test('dropped/grabbed announcement when a dragger is clicked', t => {

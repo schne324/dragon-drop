@@ -3,8 +3,6 @@
  * - Dragula supports handles (the "move" option
  * (function))...if handle is provided, configure this
  *
- * - Don't allow multiple items to be pressed -> when one is pressed, unpress the rest
- *
  * - Idea for mobile support: Press and item to pick it up (how it already works) and then
  * click a different item to insert the item at that location
  *    - may not be a great idea because it would have to be smart about placing the dropped item
@@ -58,19 +56,25 @@ export default class DragonDrop {
    *                                          (via ESC). No arguments passed in.
    */
   constructor(container, userOptions) {
+    // make the dragon an emitter
     Emitter(this);
-    this.initOptions(userOptions);
-    this.initElements(container);
-
     // init mouse drag via dragula
     this.dragula = dragula([container]);
-    this.mouseEvents();
     // init live region for custom announcements
     this.liveRegion = new LiveRegion({
       ariaLive: 'assertive',
       ariaRelevant: 'additions',
       ariaAtomic: 'true'
     });
+    // initialize elements / events
+    this
+      .initOptions(userOptions)
+      .initElements(container)
+      .mouseEvents();
+
+    debug('dragon initialized: ', this);
+
+    return this;
   }
 
   /**
@@ -81,7 +85,8 @@ export default class DragonDrop {
     userOptions = userOptions || {};
     userOptions.announcement = userOptions.announcement || {};
     this.options = mergeOptions({}, defaults, userOptions);
-    debug('dragon drop options: ', this.options);
+
+    return this;
   }
 
   /**
@@ -107,11 +112,21 @@ export default class DragonDrop {
         const wasPressed = handle.getAttribute('data-drag-on') === 'true';
         const type = wasPressed ? 'dropped' : 'grabbed';
 
+        // clean up
+        this.handles // TODO: This can probably be tied into the below items iteration
+          .filter(h => h.getAttribute('aria-pressed') === 'true')
+          .forEach(h => {
+            h.setAttribute('aria-pressed', 'false');
+            h.setAttribute('data-drag-on', 'false');
+            h.classList.remove(activeClass);
+          });
+
         handle.setAttribute('aria-pressed', `${!wasPressed}`);
         handle.setAttribute('data-drag-on', `${!wasPressed}`);
 
         this.announcement(type, cachedItems[i]);
         this.emit(type, container, cachedItems[i]);
+
         // configure classes (active and inactive)
         this.items.forEach(item => {
           const method = !wasPressed ? 'add' : 'remove';
@@ -127,6 +142,8 @@ export default class DragonDrop {
         }
       });
     });
+
+    return this;
   }
 
   setItems() {
@@ -135,6 +152,8 @@ export default class DragonDrop {
     this.handles = opts.handle
       ? queryAll([opts.item, opts.handle].join(' '), this.container)
       : this.items;
+
+    return this;
   }
 
   onKeydown(e) {
@@ -146,6 +165,7 @@ export default class DragonDrop {
       case 32:
         e.preventDefault();
         target.click();
+
         break;
       case 37:
       case 38:
@@ -155,11 +175,13 @@ export default class DragonDrop {
           e.preventDefault();
           this.arrow(which, target);
         }
+
         break;
       case 9:
         if (isDrag()) {
           target.click();
         }
+
         break;
       case 27:
         if (isDrag()) {
@@ -167,6 +189,8 @@ export default class DragonDrop {
           target.click();
         }
     }
+
+    return this;
   }
 
   arrow(which, target) {
@@ -184,13 +208,16 @@ export default class DragonDrop {
     const oldItem = items[index];
     const newItem = items[adjacentIndex];
     const refNode = isUp ? newItem : newItem.nextElementSibling;
+    // move the item in the DOM
     oldItem.parentNode.insertBefore(oldItem, refNode);
 
     target.focus();
-    this.setItems();
+    this
+      .setItems()
+      .emit('reorder', this.container, oldItem)
+      .announcement('reorder', oldItem);
 
-    this.emit('reorder', this.container, oldItem);
-    this.announcement('reorder', oldItem);
+    return this;
   }
 
   announcement(type, item) {
@@ -202,6 +229,8 @@ export default class DragonDrop {
       const msg = funk(item, this.items);
       this.liveRegion.announce(msg, 5e3);
     }
+
+    return this;
   }
 
   mouseEvents() {
@@ -210,9 +239,12 @@ export default class DragonDrop {
     });
 
     this.dragula.on('drop', el => {
-      this.announcement('dropped', el);
-      this.setItems();
+      this
+        .announcement('dropped', el)
+        .setItems();
     });
+
+    return this;
   }
 
   cancel() {
@@ -221,9 +253,13 @@ export default class DragonDrop {
     // restore the order of the list
     this.cachedItems.forEach(item => this.container.appendChild(item));
     this.items = this.cachedItems;
+    // ensure the handle stays focused
     focused.focus();
-    this.announcement('cancel');
-    this.emit('cancel');
+    this
+      .announcement('cancel')
+      .emit('cancel');
+
+    return this;
   }
 }
 

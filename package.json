@@ -10,7 +10,7 @@
     "clean": "rm -rf dist/",
     "demo": "mkdir dist/demo && cp-dir ./demo ./dist/demo",
     "deploy": "gh-pages -d dist/",
-    "dev": "watchify index.js -o dist/dragon-drop.js --verbose --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
+    "dev": "watch-run -p 'lib/**,demo/**,index.js' npm run build",
     "pre-build": "npm run clean && mkdir dist",
     "test": "babel-tape-runner test/index.js | faucet"
   },
@@ -41,7 +41,7 @@
     "simulant": "^0.2.2",
     "tape": "^4.8.0",
     "uglifyify": "^4.0.3",
-    "watchify": "^3.9.0"
+    "watch-run": "^1.2.5"
   },
   "dependencies": {
     "live-region": "^1.0.2"

@@ -9,6 +9,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * TODO:
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * - Dragula supports handles (the "move" option
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       * (function))...if handle is provided, configure this
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - Idea for mobile support: Press and item to pick it up (how it already works) and then
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * click a different item to insert the item at that location
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *    - may not be a great idea because it would have to be smart about placing the dropped item
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *    before or after the target item.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
 var _dragula = require('dragula');
@@ -83,19 +88,22 @@ var DragonDrop = function () {
   function DragonDrop(container, userOptions) {
     _classCallCheck(this, DragonDrop);
 
+    // make the dragon an emitter
     (0, _componentEmitter2.default)(this);
-    this.initOptions(userOptions);
-    this.initElements(container);
-
     // init mouse drag via dragula
     this.dragula = (0, _dragula2.default)([container]);
-    this.mouseEvents();
     // init live region for custom announcements
     this.liveRegion = new _liveRegion2.default({
       ariaLive: 'assertive',
       ariaRelevant: 'additions',
       ariaAtomic: 'true'
     });
+    // initialize elements / events
+    this.initOptions(userOptions).initElements(container).mouseEvents();
+
+    debug('dragon initialized: ', this);
+
+    return this;
   }
 
   /**
@@ -110,7 +118,8 @@ var DragonDrop = function () {
       userOptions = userOptions || {};
       userOptions.announcement = userOptions.announcement || {};
       this.options = (0, _mergeOptions2.default)({}, _defaults2.default, userOptions);
-      debug('dragon drop options: ', this.options);
+
+      return this;
     }
 
     /**
@@ -144,11 +153,22 @@ var DragonDrop = function () {
           var wasPressed = handle.getAttribute('data-drag-on') === 'true';
           var type = wasPressed ? 'dropped' : 'grabbed';
 
+          // clean up
+          _this.handles // TODO: This can probably be tied into the below items iteration
+          .filter(function (h) {
+            return h.getAttribute('aria-pressed') === 'true';
+          }).forEach(function (h) {
+            h.setAttribute('aria-pressed', 'false');
+            h.setAttribute('data-drag-on', 'false');
+            h.classList.remove(activeClass);
+          });
+
           handle.setAttribute('aria-pressed', '' + !wasPressed);
           handle.setAttribute('data-drag-on', '' + !wasPressed);
 
           _this.announcement(type, cachedItems[i]);
           _this.emit(type, container, cachedItems[i]);
+
           // configure classes (active and inactive)
           _this.items.forEach(function (item) {
             var method = !wasPressed ? 'add' : 'remove';
@@ -164,6 +184,8 @@ var DragonDrop = function () {
           }
         });
       });
+
+      return this;
     }
   }, {
     key: 'setItems',
@@ -171,6 +193,8 @@ var DragonDrop = function () {
       var opts = this.options;
       this.items = (0, _queryAll2.default)(opts.item, this.container);
       this.handles = opts.handle ? (0, _queryAll2.default)([opts.item, opts.handle].join(' '), this.container) : this.items;
+
+      return this;
     }
   }, {
     key: 'onKeydown',
@@ -187,6 +211,7 @@ var DragonDrop = function () {
         case 32:
           e.preventDefault();
           target.click();
+
           break;
         case 37:
         case 38:
@@ -196,11 +221,13 @@ var DragonDrop = function () {
             e.preventDefault();
             this.arrow(which, target);
           }
+
           break;
         case 9:
           if (isDrag()) {
             target.click();
           }
+
           break;
         case 27:
           if (isDrag()) {
@@ -208,6 +235,8 @@ var DragonDrop = function () {
             target.click();
           }
       }
+
+      return this;
     }
   }, {
     key: 'arrow',
@@ -227,13 +256,13 @@ var DragonDrop = function () {
       var oldItem = items[index];
       var newItem = items[adjacentIndex];
       var refNode = isUp ? newItem : newItem.nextElementSibling;
+      // move the item in the DOM
       oldItem.parentNode.insertBefore(oldItem, refNode);
 
       target.focus();
-      this.setItems();
+      this.setItems().emit('reorder', this.container, oldItem).announcement('reorder', oldItem);
 
-      this.emit('reorder', this.container, oldItem);
-      this.announcement('reorder', oldItem);
+      return this;
     }
   }, {
     key: 'announcement',
@@ -246,6 +275,8 @@ var DragonDrop = function () {
         var msg = funk(item, this.items);
         this.liveRegion.announce(msg, 5e3);
       }
+
+      return this;
     }
   }, {
     key: 'mouseEvents',
@@ -257,9 +288,10 @@ var DragonDrop = function () {
       });
 
       this.dragula.on('drop', function (el) {
-        _this2.announcement('dropped', el);
-        _this2.setItems();
+        _this2.announcement('dropped', el).setItems();
       });
+
+      return this;
     }
   }, {
     key: 'cancel',
@@ -273,9 +305,11 @@ var DragonDrop = function () {
         return _this3.container.appendChild(item);
       });
       this.items = this.cachedItems;
+      // ensure the handle stays focused
       focused.focus();
-      this.announcement('cancel');
-      this.emit('cancel');
+      this.announcement('cancel').emit('cancel');
+
+      return this;
     }
   }]);
 
