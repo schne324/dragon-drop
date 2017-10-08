@@ -15,8 +15,5 @@
     "bower_components",
     "test",
     "tests"
-  ],
-  "dependencies": {
-    "dd-mouse-sortable": "^1.0.1"
-  }
+  ]
 }

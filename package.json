@@ -1,10 +1,18 @@
 {
   "name": "drag-on-drop",
-  "version": "2.1.7",
+  "version": "3.0.0",
   "description": "Drag and/or drop",
-  "main": "dragon-drop.js",
+  "main": "dist/dragon-drop.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run pre-build && npm run bundle && npm run bundle:min && npm run demo",
+    "bundle": "browserify index.js -o dist/dragon-drop.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
+    "bundle:min": "browserify -g uglifyify index.js -o dist/dragon-drop.min.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
+    "clean": "rm -rf dist/",
+    "demo": "mkdir dist/demo && cp-dir ./demo ./dist/demo",
+    "deploy": "gh-pages -d dist/",
+    "dev": "watch-run -p 'lib/**,demo/**,index.js' npm run build",
+    "pre-build": "npm run clean && mkdir dist",
+    "test": "babel-tape-runner test/index.js | faucet"
   },
   "repository": {
     "type": "git",
@@ -17,11 +25,25 @@
   },
   "homepage": "https://github.com/schne324/dragon-drop#readme",
   "devDependencies": {
-    "gulp": "^3.9.0",
-    "gulp-jade": "^1.1.0",
-    "gulp-stylus": "^2.1.1",
-    "jade": "^1.11.0",
-    "path": "^0.12.7",
-    "stylus": "^0.53.0"
+    "babel-preset-es2015": "^6.24.1",
+    "babel-tape-runner": "^2.0.1",
+    "babelify": "^7.3.0",
+    "browserify": "^14.4.0",
+    "component-emitter": "^1.2.1",
+    "cp-dir": "^1.0.3",
+    "debug": "^3.0.0",
+    "dragula": "^3.7.2",
+    "faucet": "0.0.1",
+    "gh-pages": "^1.0.0",
+    "jsdom": "^11.2.0",
+    "jsdom-global": "^3.0.2",
+    "merge-options": "^1.0.0",
+    "simulant": "^0.2.2",
+    "tape": "^4.8.0",
+    "uglifyify": "^4.0.3",
+    "watch-run": "^1.2.5"
+  },
+  "dependencies": {
+    "live-region": "^1.0.2"
   }
 }
