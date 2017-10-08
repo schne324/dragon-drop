@@ -46,7 +46,7 @@ The selector for the drag items (qualified within container). Defaults to
 ```
 
 ##### `handle` _String_
-The selector for the keyboard handle. If set to `false`, the entire item will be used as the handle. Defaults to
+The selector for the keyboard handle (qualified within the container and the selector provided for `item`). If set to `false`, the entire item will be used as the handle. Defaults to
 ```ks
 'button'
 ```
@@ -150,6 +150,18 @@ dragonDrop
 ```js
 dragonDrop.dragula.on('drop', ...);
 ```
+
+## Debugging
+
+Set the following localStorage option to debug dragonDrop
+
+```js
+localStorage.debug = 'drag-on-drop:*';
+```
+
+## Demo
+
+http://schne324.github.io/dragon-drop/demo/
 
 ## Thanks!
 A special thanks to contributors/maintainers of [dragula](https://github.com/bevacqua/dragula) which is used for all of the mouse behavior/interaction for dragon drop!
