@@ -234,8 +234,8 @@ var DragonDrop = function () {
           break;
         case 27:
           if (isDrag()) {
-            this.cancel();
             target.click();
+            this.cancel();
           }
       }
 
@@ -277,6 +277,7 @@ var DragonDrop = function () {
       if (funk && typeof funk === 'function') {
         var msg = funk(item, this.items);
         this.liveRegion.announce(msg, 5e3);
+        this.emit('announcement', msg);
       }
 
       return this;
@@ -310,7 +311,7 @@ var DragonDrop = function () {
       this.items = this.cachedItems;
       // ensure the handle stays focused
       focused.focus();
-      this.announcement('cancel').emit('cancel');
+      this.announcement('cancel').emit('cancel').setItems();
 
       return this;
     }
