@@ -188,8 +188,8 @@ export default class DragonDrop {
         break;
       case 27:
         if (isDrag()) {
-          this.cancel();
           target.click();
+          this.cancel();
         }
     }
 
@@ -231,6 +231,7 @@ export default class DragonDrop {
     if (funk && typeof funk === 'function') {
       const msg = funk(item, this.items);
       this.liveRegion.announce(msg, 5e3);
+      this.emit('announcement', msg);
     }
 
     return this;
