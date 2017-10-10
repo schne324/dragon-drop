@@ -311,7 +311,7 @@ var DragonDrop = function () {
       this.items = this.cachedItems;
       // ensure the handle stays focused
       focused.focus();
-      this.announcement('cancel').emit('cancel');
+      this.announcement('cancel').emit('cancel').setItems();
 
       return this;
     }

@@ -261,7 +261,8 @@ export default class DragonDrop {
     focused.focus();
     this
       .announcement('cancel')
-      .emit('cancel');
+      .emit('cancel')
+      .setItems();
 
     return this;
   }
