@@ -1,6 +1,6 @@
 {
   "name": "drag-on-drop",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Drag and/or drop",
   "main": "dist/dragon-drop.js",
   "scripts": {
