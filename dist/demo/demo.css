@@ -9,6 +9,7 @@ h1 {
   font-family: 'Poiret One', cursive;
   font-size: 5em;
   text-align: center;
+  margin: 10px 0;
 }
 
 header {
@@ -16,6 +17,10 @@ header {
   color: #fff;
   padding: 40px;
   text-align: center;
+}
+
+header img {
+  width: 200px;
 }
 
 main {
@@ -27,6 +32,7 @@ main {
 
 h2 {
   font-size: 2em;
+  margin: 8px 0;
 }
 
 h3 {
