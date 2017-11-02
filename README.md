@@ -1,5 +1,7 @@
 # Dragon Drop
-Keyboard accessible drag-and-drop reorder list
+Keyboard accessible drag-and-drop reorder list.
+
+Special thanks to Aaron Pearlman for the logo.
 
 [demo](https://schne324.github.io/dragon-drop/demo/)
 
