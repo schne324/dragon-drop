@@ -1,9 +1,9 @@
 # Dragon Drop
 Keyboard accessible drag-and-drop reorder list.
 
-Special thanks to Aaron Pearlman for the logo.
+## Demo
 
-[demo](https://schne324.github.io/dragon-drop/demo/)
+http://schne324.github.io/dragon-drop/demo/
 
 ## Installation
 
@@ -163,9 +163,8 @@ Set the following localStorage option to debug dragonDrop
 localStorage.debug = 'drag-on-drop:*';
 ```
 
-## Demo
-
-http://schne324.github.io/dragon-drop/demo/
-
 ## Thanks!
-A special thanks to contributors/maintainers of [dragula](https://github.com/bevacqua/dragula) which is used for all of the mouse behavior/interaction for dragon drop!
+
+A special thanks to Aaron Pearlman for the logo.
+
+Another special thanks to contributors/maintainers of [dragula](https://github.com/bevacqua/dragula) which is used for all of the mouse behavior/interaction for dragon drop!
