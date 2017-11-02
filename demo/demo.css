@@ -23,6 +23,17 @@ header img {
   width: 200px;
 }
 
+.fa-github {
+  color: #fff;
+  font-size: 55px;
+  text-decoration: none;
+}
+
+.fa-github:hover {
+  transition: color 700ms;
+  color: #000;
+}
+
 main {
   padding: 25px;
   font-size: 16px;
@@ -67,6 +78,7 @@ li[aria-pressed="true"] {
   padding: 0 20px;
   margin: 0 auto;
   max-width: 600px;
+  margin-bottom: 20px;
 }
 
 .demo > li {
@@ -91,6 +103,7 @@ li[aria-pressed="true"] {
   padding: 0;
   max-width: 600px;
   margin: 10px auto;
+  margin-bottom: 20px;
 }
 
 #demo-2 li {
@@ -131,13 +144,14 @@ li[aria-pressed="true"] {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 50px;
+  height: 70px;
   line-height: 18px;
   overflow: auto;
-  padding: 5px;
+  padding: 7px 5px;
   box-sizing: border-box;
-  background: #7654C4;
+  background: #141414;
   color: #fff;
+  opacity: .94;
   display: none;
 }
 
