@@ -11,6 +11,8 @@
 
 import dragula from 'dragula';
 import LiveRegion from 'live-region';
+import closest from 'closest';
+import delegate from 'delegate';
 import mergeOptions from 'merge-options';
 import createDebug from 'debug';
 import Emitter from 'component-emitter';
@@ -66,11 +68,14 @@ export default class DragonDrop {
       ariaRelevant: 'additions',
       ariaAtomic: 'true'
     });
+
+    this.onKeydown = this.onKeydown.bind(this);
     // initialize elements / events
     this
       .initOptions(userOptions)
       .initElements(container)
-      .mouseEvents();
+      .mouseEvents()
+      .initClick();
 
     debug('dragon initialized: ', this);
 
@@ -89,20 +94,59 @@ export default class DragonDrop {
     return this;
   }
 
+  initClick() {
+    const { activeClass, inactiveClass, item } = this.options;
+    const sel = this.options.handle ? `${item} ${this.options.handle}` : item;
+
+    delegate(this.container, sel, 'click', e => {
+      const handle = e.delegateTarget;
+      const wasPressed = handle.getAttribute('data-drag-on') === 'true';
+      const type = wasPressed ? 'dropped' : 'grabbed';
+
+      // clean up
+      this.handles // TODO: This can probably be tied into the below items iteration
+        .filter(h => h.getAttribute('aria-pressed') === 'true')
+        .forEach(h => {
+          h.setAttribute('aria-pressed', 'false');
+          h.setAttribute('data-drag-on', 'false');
+          h.classList.remove(activeClass);
+        });
+
+      handle.setAttribute('aria-pressed', `${!wasPressed}`);
+      handle.setAttribute('data-drag-on', `${!wasPressed}`);
+
+      const thisItem = closest(handle, item, true);
+      this.announcement(type, thisItem);
+      this.emit(type, this.container, thisItem);
+
+      // configure classes (active and inactive)
+      this.items.forEach(it => {
+        const method = !wasPressed ? 'add' : 'remove';
+        const isTarget = it === handle || it.contains(handle);
+
+        it.classList[(isTarget && !wasPressed) ? 'add' : 'remove'](activeClass);
+        it.classList[(isTarget && !wasPressed) ? 'remove' : method](inactiveClass);
+      });
+
+      if (!wasPressed) {
+        // cache the initial order to allow for escape cancellation
+        this.cachedItems = queryAll(this.options.item, this.container);
+      }
+    });
+
+    return this;
+  }
+
   /**
    * Sets all element refs
    * @param {HTMLElement} container the containing element
    */
   initElements(container) {
-    const { activeClass, inactiveClass } = this.options;
-
     this.container = container;
     this.setItems();
 
-    const cachedItems = this.items;
-
     // set all attrs/props/events on handle elements
-    this.handles.forEach((handle, i) => {
+    this.handles.forEach(handle => {
       handle.tabIndex = 0; // ensure it is focusable
 
       if (handle.tagName !== 'BUTTON') {
@@ -110,40 +154,8 @@ export default class DragonDrop {
       }
 
       // events
-      handle.addEventListener('keydown', this.onKeydown.bind(this));
-      handle.addEventListener('click', () => {
-        const wasPressed = handle.getAttribute('data-drag-on') === 'true';
-        const type = wasPressed ? 'dropped' : 'grabbed';
-
-        // clean up
-        this.handles // TODO: This can probably be tied into the below items iteration
-          .filter(h => h.getAttribute('aria-pressed') === 'true')
-          .forEach(h => {
-            h.setAttribute('aria-pressed', 'false');
-            h.setAttribute('data-drag-on', 'false');
-            h.classList.remove(activeClass);
-          });
-
-        handle.setAttribute('aria-pressed', `${!wasPressed}`);
-        handle.setAttribute('data-drag-on', `${!wasPressed}`);
-
-        this.announcement(type, cachedItems[i]);
-        this.emit(type, container, cachedItems[i]);
-
-        // configure classes (active and inactive)
-        this.items.forEach(item => {
-          const method = !wasPressed ? 'add' : 'remove';
-          const isTarget = item === handle || item.contains(handle);
-
-          item.classList[(isTarget && !wasPressed) ? 'add' : 'remove'](activeClass);
-          item.classList[(isTarget && !wasPressed) ? 'remove' : method](inactiveClass);
-        });
-
-        if (!wasPressed) {
-          // cache the initial order to allow for escape cancellation
-          this.cachedItems = queryAll(this.options.item, container);
-        }
-      });
+      handle.removeEventListener('keydown', this.onKeydown);
+      handle.addEventListener('keydown', this.onKeydown);
     });
 
     return this;

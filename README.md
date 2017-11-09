@@ -34,6 +34,45 @@ const DragonDrop = window.DragonDrop;
 const dragon = new DragonDrop(container, options);
 ```
 
+### React
+
+Although a DragonDrop react component doesn't exist (yet), it can be used _with_ react:
+
+```js
+class App extends Component {
+  componentDidMount() {
+    this.setState({
+      dragonDrop: new DragonDrop(this.dragon)
+    });
+  }
+
+  componentDidUpdate() {
+    const { dragonDrop } = this.state;
+    // this public method allows dragon drop to
+    // reassess the updated items and handles
+    dragonDrop.initElements();
+  }
+
+  render() {
+    return (
+      <ul className='dragon' ref={el => this.dragon = el}>
+        <li>
+          <button type='button' aria-label='Reorder' />
+          <span>Item 1</span>
+        </li>
+        <li>
+          <button type='button' aria-label='Reorder' />
+          <span>Item 2</span>
+        </li>
+      </ul>
+    );
+  }
+}
+```
+[Full example](https://codepen.io/schne324/pen/dZOGeG)
+
+**NOTE** usage with react is not exactly ideal because DragonDrop uses DOM events which means react doesn't know about the order changes
+
 ## API
 
 ### `new DragonDrop(container, [options])`
