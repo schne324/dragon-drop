@@ -73,6 +73,10 @@ class App extends Component {
 
 **NOTE** usage with react is not exactly ideal because DragonDrop uses normal DOM events not picked up by react (react doesn't know about the reordering).
 
+### CDN (unpkg)
+
+https://unpkg.com/drag-on-drop
+
 ## API
 
 ### `new DragonDrop(container, [options])`
