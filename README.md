@@ -8,6 +8,8 @@ Keyboard accessible drag-and-drop reorder list.
 
 http://schne324.github.io/dragon-drop/demo/
 
+<img alt="" role="presentation" src="/demo/dragon-drop-screenshot.png" width="400" />
+
 ## Installation
 
 ## npm
