@@ -1,5 +1,8 @@
 # Dragon Drop
+
 Keyboard accessible drag-and-drop reorder list.
+
+<img alt="Dragon Drop" src="/demo/dragondrop_sticker.png" width="400" />
 
 ## Demo
 
