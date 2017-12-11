@@ -1,9 +1,3 @@
-/**
- * TODO:
- * - Dragula supports handles (the "move" option
- * (function))...if handle is provided, configure this
- */
-
 import dragula from 'dragula';
 import LiveRegion from 'live-region';
 import closest from 'closest';
