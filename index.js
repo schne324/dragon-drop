@@ -1,14 +1,3 @@
-/**
- * TODO:
- * - Dragula supports handles (the "move" option
- * (function))...if handle is provided, configure this
- *
- * - Idea for mobile support: Press and item to pick it up (how it already works) and then
- * click a different item to insert the item at that location
- *    - may not be a great idea because it would have to be smart about placing the dropped item
- *    before or after the target item.
- */
-
 import dragula from 'dragula';
 import LiveRegion from 'live-region';
 import closest from 'closest';
@@ -16,6 +5,7 @@ import delegate from 'delegate';
 import mergeOptions from 'merge-options';
 import createDebug from 'debug';
 import Emitter from 'component-emitter';
+import matches from 'dom-matches';
 
 import defaults from './lib/defaults';
 import queryAll from './lib/query-all';
@@ -60,8 +50,14 @@ export default class DragonDrop {
   constructor(container, userOptions) {
     // make the dragon an emitter
     Emitter(this);
+
+    this.initOptions(userOptions);
+    // if handle is truthy, pass this info along with
+    const dragulaOpts = this.options.handle && {
+      moves: (_, __, handle) => matches(handle, this.options.handle)
+    };
     // init mouse drag via dragula
-    this.dragula = dragula([container]);
+    this.dragula = dragula([container], dragulaOpts);
     // init live region for custom announcements
     this.liveRegion = new LiveRegion({
       ariaLive: 'assertive',
@@ -72,7 +68,6 @@ export default class DragonDrop {
     this.onKeydown = this.onKeydown.bind(this);
     // initialize elements / events
     this
-      .initOptions(userOptions)
       .initElements(container)
       .mouseEvents()
       .initClick();

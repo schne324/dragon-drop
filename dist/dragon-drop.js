@@ -5,16 +5,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * TODO:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - Dragula supports handles (the "move" option
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * (function))...if handle is provided, configure this
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * - Idea for mobile support: Press and item to pick it up (how it already works) and then
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * click a different item to insert the item at that location
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *    - may not be a great idea because it would have to be smart about placing the dropped item
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *    before or after the target item.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _dragula = require('dragula');
 
@@ -43,6 +34,10 @@ var _debug2 = _interopRequireDefault(_debug);
 var _componentEmitter = require('component-emitter');
 
 var _componentEmitter2 = _interopRequireDefault(_componentEmitter);
+
+var _domMatches = require('dom-matches');
+
+var _domMatches2 = _interopRequireDefault(_domMatches);
 
 var _defaults = require('./lib/defaults');
 
@@ -94,12 +89,22 @@ var DragonDrop = function () {
    *                                          (via ESC). No arguments passed in.
    */
   function DragonDrop(container, userOptions) {
+    var _this = this;
+
     _classCallCheck(this, DragonDrop);
 
     // make the dragon an emitter
     (0, _componentEmitter2.default)(this);
+
+    this.initOptions(userOptions);
+    // if handle is truthy, pass this info along with
+    var dragulaOpts = this.options.handle && {
+      moves: function moves(_, __, handle) {
+        return (0, _domMatches2.default)(handle, _this.options.handle);
+      }
+    };
     // init mouse drag via dragula
-    this.dragula = (0, _dragula2.default)([container]);
+    this.dragula = (0, _dragula2.default)([container], dragulaOpts);
     // init live region for custom announcements
     this.liveRegion = new _liveRegion2.default({
       ariaLive: 'assertive',
@@ -109,7 +114,7 @@ var DragonDrop = function () {
 
     this.onKeydown = this.onKeydown.bind(this);
     // initialize elements / events
-    this.initOptions(userOptions).initElements(container).mouseEvents().initClick();
+    this.initElements(container).mouseEvents().initClick();
 
     debug('dragon initialized: ', this);
 
@@ -134,7 +139,7 @@ var DragonDrop = function () {
   }, {
     key: 'initClick',
     value: function initClick() {
-      var _this = this;
+      var _this2 = this;
 
       var _options = this.options,
           activeClass = _options.activeClass,
@@ -149,7 +154,7 @@ var DragonDrop = function () {
         var type = wasPressed ? 'dropped' : 'grabbed';
 
         // clean up
-        _this.handles // TODO: This can probably be tied into the below items iteration
+        _this2.handles // TODO: This can probably be tied into the below items iteration
         .filter(function (h) {
           return h.getAttribute('aria-pressed') === 'true';
         }).forEach(function (h) {
@@ -162,11 +167,11 @@ var DragonDrop = function () {
         handle.setAttribute('data-drag-on', '' + !wasPressed);
 
         var thisItem = (0, _closest2.default)(handle, item, true);
-        _this.announcement(type, thisItem);
-        _this.emit(type, _this.container, thisItem);
+        _this2.announcement(type, thisItem);
+        _this2.emit(type, _this2.container, thisItem);
 
         // configure classes (active and inactive)
-        _this.items.forEach(function (it) {
+        _this2.items.forEach(function (it) {
           var method = !wasPressed ? 'add' : 'remove';
           var isTarget = it === handle || it.contains(handle);
 
@@ -176,7 +181,7 @@ var DragonDrop = function () {
 
         if (!wasPressed) {
           // cache the initial order to allow for escape cancellation
-          _this.cachedItems = (0, _queryAll2.default)(_this.options.item, _this.container);
+          _this2.cachedItems = (0, _queryAll2.default)(_this2.options.item, _this2.container);
         }
       });
 
@@ -191,7 +196,7 @@ var DragonDrop = function () {
   }, {
     key: 'initElements',
     value: function initElements(container) {
-      var _this2 = this;
+      var _this3 = this;
 
       this.container = container;
       this.setItems();
@@ -205,8 +210,8 @@ var DragonDrop = function () {
         }
 
         // events
-        handle.removeEventListener('keydown', _this2.onKeydown);
-        handle.addEventListener('keydown', _this2.onKeydown);
+        handle.removeEventListener('keydown', _this3.onKeydown);
+        handle.addEventListener('keydown', _this3.onKeydown);
       });
 
       return this;
@@ -306,14 +311,14 @@ var DragonDrop = function () {
   }, {
     key: 'mouseEvents',
     value: function mouseEvents() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.dragula.on('drag', function (el) {
-        _this3.announcement('grabbed', el);
+        _this4.announcement('grabbed', el);
       });
 
       this.dragula.on('drop', function (el) {
-        _this3.announcement('dropped', el).setItems();
+        _this4.announcement('dropped', el).setItems();
       });
 
       return this;
@@ -321,13 +326,13 @@ var DragonDrop = function () {
   }, {
     key: 'cancel',
     value: function cancel() {
-      var _this4 = this;
+      var _this5 = this;
 
       // cache active element so it can be focused after reorder
       var focused = document.activeElement;
       // restore the order of the list
       this.cachedItems.forEach(function (item) {
-        return _this4.container.appendChild(item);
+        return _this5.container.appendChild(item);
       });
       this.items = this.cachedItems;
       // ensure the handle stays focused
@@ -347,7 +352,7 @@ var DragonDrop = function () {
 exports.default = DragonDrop;
 module.exports = DragonDrop;
 
-},{"./lib/defaults":2,"./lib/query-all":3,"closest":5,"component-emitter":6,"debug":12,"delegate":15,"dragula":17,"live-region":19,"merge-options":21}],2:[function(require,module,exports){
+},{"./lib/defaults":2,"./lib/query-all":3,"closest":5,"component-emitter":6,"debug":12,"delegate":15,"dom-matches":16,"dragula":18,"live-region":20,"merge-options":22}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -404,7 +409,7 @@ module.exports = function (element, selector, checkYoSelf) {
   }
 }
 
-},{"matches-selector":20}],6:[function(require,module,exports){
+},{"matches-selector":21}],6:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -581,7 +586,7 @@ module.exports = function debounce (fn, args, ctx) {
   });
 };
 
-},{"ticky":24}],8:[function(require,module,exports){
+},{"ticky":25}],8:[function(require,module,exports){
 'use strict';
 
 var atoa = require('atoa');
@@ -1010,7 +1015,7 @@ function localstorage() {
 }
 
 }).call(this,require('_process'))
-},{"./debug":13,"_process":23}],13:[function(require,module,exports){
+},{"./debug":13,"_process":24}],13:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1237,7 +1242,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":22}],14:[function(require,module,exports){
+},{"ms":23}],14:[function(require,module,exports){
 var DOCUMENT_NODE_TYPE = 9;
 
 /**
@@ -1321,6 +1326,57 @@ module.exports = delegate;
 },{"./closest":14}],16:[function(require,module,exports){
 'use strict';
 
+/**
+ * Determine if a DOM element matches a CSS selector
+ *
+ * @param {Element} elem
+ * @param {String} selector
+ * @return {Boolean}
+ * @api public
+ */
+
+function matches(elem, selector) {
+  // Vendor-specific implementations of `Element.prototype.matches()`.
+  var proto = window.Element.prototype;
+  var nativeMatches = proto.matches ||
+      proto.mozMatchesSelector ||
+      proto.msMatchesSelector ||
+      proto.oMatchesSelector ||
+      proto.webkitMatchesSelector;
+
+  if (!elem || elem.nodeType !== 1) {
+    return false;
+  }
+
+  var parentElem = elem.parentNode;
+
+  // use native 'matches'
+  if (nativeMatches) {
+    return nativeMatches.call(elem, selector);
+  }
+
+  // native support for `matches` is missing and a fallback is required
+  var nodes = parentElem.querySelectorAll(selector);
+  var len = nodes.length;
+
+  for (var i = 0; i < len; i++) {
+    if (nodes[i] === elem) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Expose `matches`
+ */
+
+module.exports = matches;
+
+},{}],17:[function(require,module,exports){
+'use strict';
+
 var cache = {};
 var start = '(?:^|\\s)';
 var end = '(?:\\s|$)';
@@ -1353,7 +1409,7 @@ module.exports = {
   rm: rmClass
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1965,7 +2021,7 @@ function getCoord (coord, e) {
 module.exports = dragula;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./classes":16,"contra/emitter":8,"crossvent":9}],18:[function(require,module,exports){
+},{"./classes":17,"contra/emitter":8,"crossvent":9}],19:[function(require,module,exports){
 'use strict';
 var toString = Object.prototype.toString;
 
@@ -1974,7 +2030,7 @@ module.exports = function (x) {
 	return toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2049,7 +2105,7 @@ if (typeof module !== 'undefined') {
   module.exports = LiveRegion;
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 
 /**
  * Element prototype.
@@ -2090,7 +2146,7 @@ function match(el, selector) {
   }
   return false;
 }
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 const isOptionObject = require('is-plain-obj');
 
@@ -2247,7 +2303,7 @@ module.exports = function () {
 	return merged;
 };
 
-},{"is-plain-obj":18}],22:[function(require,module,exports){
+},{"is-plain-obj":19}],23:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -2401,7 +2457,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -2587,7 +2643,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var si = typeof setImmediate === 'function', tick;
 if (si) {
   tick = function (fn) { setImmediate(fn); };
