@@ -144,11 +144,15 @@ var DragonDrop = function () {
       var _options = this.options,
           activeClass = _options.activeClass,
           inactiveClass = _options.inactiveClass,
-          item = _options.item;
+          item = _options.item,
+          nested = _options.nested;
 
       var sel = this.options.handle ? item + ' ' + this.options.handle : item;
 
       (0, _delegate2.default)(this.container, sel, 'click', function (e) {
+        if (nested) {
+          e.stopPropagation();
+        }
         var handle = e.delegateTarget;
         var wasPressed = handle.getAttribute('data-drag-on') === 'true';
         var type = wasPressed ? 'dropped' : 'grabbed';
@@ -228,6 +232,7 @@ var DragonDrop = function () {
   }, {
     key: 'onKeydown',
     value: function onKeydown(e) {
+      var nested = this.options.nested;
       var target = e.target,
           which = e.which;
 
@@ -238,6 +243,9 @@ var DragonDrop = function () {
       switch (which) {
         case 13:
         case 32:
+          if (nested) {
+            e.stopPropagation();
+          }
           e.preventDefault();
           target.click();
 
@@ -276,13 +284,12 @@ var DragonDrop = function () {
       var index = handles.indexOf(target);
       var adjacentIndex = isUp ? index - 1 : index + 1;
       var adjacentItem = handles[adjacentIndex];
+      var oldItem = items[index];
 
-      if (!adjacentItem) {
-        // prevents circularity
+      if (!adjacentItem || !oldItem) {
         return;
       }
 
-      var oldItem = items[index];
       var newItem = items[adjacentIndex];
       var refNode = isUp ? newItem : newItem.nextElementSibling;
       // move the item in the DOM
@@ -363,6 +370,7 @@ var defaults = {
   handle: 'button', // qualified within `item`
   activeClass: 'dragon-active', // added to item being dragged
   inactiveClass: 'dragon-inactive', // added to other items when item is being dragged
+  nested: false, // if true, stops propagation on keydown / click events
   announcement: {
     grabbed: function grabbed(el) {
       return 'Item ' + el.innerText + ' grabbed';

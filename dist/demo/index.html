@@ -108,6 +108,35 @@
           </code>
         </pre>
       </section>
+      <section>
+        <h3 id="nested">Nested lists</h3>
+        <ul id="demo-3">
+          <li class="top-level">
+            <span>Top level item 1</span>
+            <ul id="sub-1">
+              <li>sub item 1a</li>
+              <li>sub item 2a</li>
+              <li>sub item 3a</li>
+            </ul>
+          </li>
+          <li class="top-level">
+            <span>Top level item 2</span>
+            <ul id="sub-2">
+              <li>sub item 1b</li>
+              <li>sub item 2b</li>
+              <li>sub item 3b</li>
+            </ul>
+          </li>
+          <li class="top-level">
+            <span>Top level item 3</span>
+            <ul id="sub-3">
+              <li>sub item 1c</li>
+              <li>sub item 2c</li>
+              <li>sub item 3c</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
       <div class="live-log" id="live-log"></div>
     </main>
     <script src="https://unpkg.com/rainbow-code/dist/rainbow.min.js"></script>
@@ -161,6 +190,31 @@
       });
 
       demo2.on('announcement', onAnnouncement);
+
+      var demo3 = new DragonDrop(document.getElementById('demo-3'), {
+        handle: false,
+        nested: true,
+        item: '.top-level'
+      });
+      demo3.on('announcement', onAnnouncement);
+
+      var demo3a = new DragonDrop(document.getElementById('sub-1'), {
+        handle: false,
+        nested: true
+      });
+      demo3a.on('announcement', onAnnouncement);
+
+      var demo3b = new DragonDrop(document.getElementById('sub-2'), {
+        handle: false,
+        nested: true
+      });
+      demo3b.on('announcement', onAnnouncement);
+
+      var demo3c = new DragonDrop(document.getElementById('sub-3'), {
+        handle: false,
+        nested: true
+      });
+      demo3c.on('announcement', onAnnouncement);
 
       var checkbox = document.getElementById('display-region');
 
