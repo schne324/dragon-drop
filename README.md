@@ -10,6 +10,10 @@ http://schne324.github.io/dragon-drop/demo/
 
 <img alt="" role="presentation" src="/demo/dragon-drop-screenshot.png" width="400" />
 
+## Enter the dragon...
+
+For an in-depth look at dragon drop see the [smashing magazine article on dragon drop](https://www.smashingmagazine.com/2018/01/dragon-drop-accessible-list-reordering/)
+
 ## Installation
 
 ## npm
@@ -253,6 +257,16 @@ Set the following localStorage option to debug dragonDrop
 ```js
 localStorage.debug = 'drag-on-drop:*';
 ```
+
+## Notes on accessibility
+
+There are certain things that are left up to the discretion of the implementer.  This is to keep `DragonDrop` less opinionated on some of the gray areas of a11y. The [demos](http://schne324.github.io/dragon-drop/demo/) show a few different approaches on associating help text with DragonDrop:
+
+1. __Recommended__ `aria-describedby` on each control (item, or if applicable, handle). This is the safest/test approach because it guarantees that AT users will receive the instructions. [Demo of this approach](https://schne324.github.io/dragon-drop/demo/index.html#bands-head)
+1. __Recommended__ `aria-labelledby` on the container/list element.  With this approach, where supported, will announce the instructions whenever the AT users enters the list (which is less verbose than the above). [Demo of this approach](https://schne324.github.io/dragon-drop/demo/index.html#schedule-head)
+1. __Not recommended__`aria-describedby` on the container/list element. This approach, where supported, will only announce the instructions if the screen reader user traverses to the actual list element. [Demo of this approach](https://schne324.github.io/dragon-drop/demo/index.html#nested)
+
+For more information regarding accessibility you can read an [accessibility review of dragon drop](https://github.com/schne324/dragon-drop/issues/6) initiated by Drupal.
 
 ## Thanks!
 
