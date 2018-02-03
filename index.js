@@ -1,7 +1,6 @@
+import 'element-qsa-scope';
 import dragula from 'dragula';
 import LiveRegion from 'live-region';
-import closest from 'closest';
-import delegate from 'delegate';
 import mergeOptions from 'merge-options';
 import createDebug from 'debug';
 import Emitter from 'component-emitter';
@@ -11,6 +10,53 @@ import defaults from './lib/defaults';
 import queryAll from './lib/query-all';
 
 const debug = createDebug('drag-on-drop:index');
+const arrayHandler = (containers, userOptions = {}) => {
+  const { nested } = userOptions;
+  const instances = [];
+
+  containers.forEach(container => {
+    instances.push(new DragonDrop(container, userOptions, nested));
+  });
+
+  if (nested) {
+    const onDrag = (el, source) => {
+      const instance = instances.find(inst => inst.container === source);
+      if (instance) {
+        instance.announcement('grabbed', el);
+      }
+    };
+    const onDrop = (el, source) => {
+      const instance = instances.find(inst => inst.container === source);
+      if (instance) {
+        instance.announcement('dropped', el).setItems();
+      }
+    };
+
+    const topMost = containers[0];
+    const lists = Array.from(containers);
+    lists.shift(); // remove the top-most conatainer
+
+    const topLevelDragula = dragula([topMost], {
+      moves: (_, __, handle) => !lists.find(l => l.contains(handle))
+    });
+
+    topLevelDragula.on('drag', onDrag);
+    topLevelDragula.on('drop', onDrop);
+
+    const nestedDragula = dragula(lists, {
+      accepts: (el, target, source) => {
+        // TODO: when `options.locked` is implemented...
+        // if (!options.locked) { return true }
+        return target === source;
+      }
+    });
+
+    nestedDragula.on('drag', onDrag);
+    nestedDragula.on('drop', onDrop);
+  }
+
+  return instances;
+};
 
 export default class DragonDrop {
   /**
@@ -47,17 +93,25 @@ export default class DragonDrop {
    * @option {Function} announcement.cancel - The function called when the reorder is cancelled
    *                                          (via ESC). No arguments passed in.
    */
-  constructor(container, userOptions) {
+  constructor(container, userOptions = {}) {
+    if (Array.isArray(container)) {
+      return arrayHandler(container, userOptions);
+    }
     // make the dragon an emitter
     Emitter(this);
-
     this.initOptions(userOptions);
-    // if handle is truthy, pass this info along with
-    const dragulaOpts = this.options.handle && {
-      moves: (_, __, handle) => matches(handle, this.options.handle)
-    };
-    // init mouse drag via dragula
-    this.dragula = dragula([container], dragulaOpts);
+
+    const { handle, nested } = this.options;
+
+    if (!nested) {
+      // if handle is truthy, pass this info along with
+      const dragulaOpts = handle && {
+        moves: (_, __, h) => matches(h, handle)
+      };
+      // init mouse drag via dragula
+      this.dragula = dragula([container], dragulaOpts);
+    }
+
     // init live region for custom announcements
     this.liveRegion = new LiveRegion({
       ariaLive: 'assertive',
@@ -66,6 +120,7 @@ export default class DragonDrop {
     });
 
     this.onKeydown = this.onKeydown.bind(this);
+
     // initialize elements / events
     this
       .initElements(container)
@@ -82,7 +137,6 @@ export default class DragonDrop {
    * @param  {Object} userOptions the user provided options
    */
   initOptions(userOptions) {
-    userOptions = userOptions || {};
     userOptions.announcement = userOptions.announcement || {};
     this.options = mergeOptions({}, defaults, userOptions);
 
@@ -90,44 +144,47 @@ export default class DragonDrop {
   }
 
   initClick() {
-    const { activeClass, inactiveClass, item, nested } = this.options;
-    const sel = this.options.handle ? `${item} ${this.options.handle}` : item;
+    const { activeClass, inactiveClass, nested} = this.options;
 
-    delegate(this.container, sel, 'click', e => {
-      if (nested) { e.stopPropagation(); }
-      const handle = e.delegateTarget;
-      const wasPressed = handle.getAttribute('data-drag-on') === 'true';
-      const type = wasPressed ? 'dropped' : 'grabbed';
+    this.handles.forEach(handle => {
+      handle.addEventListener('click', e => {
+        if (nested) { e.stopPropagation(); }
+        const wasPressed = handle.getAttribute('data-drag-on') === 'true';
+        const type = wasPressed ? 'dropped' : 'grabbed';
 
-      // clean up
-      this.handles // TODO: This can probably be tied into the below items iteration
-        .filter(h => h.getAttribute('aria-pressed') === 'true')
-        .forEach(h => {
-          h.setAttribute('aria-pressed', 'false');
-          h.setAttribute('data-drag-on', 'false');
-          h.classList.remove(activeClass);
+        // clean up
+        this.handles // TODO: This can probably be tied into the below items iteration
+          .filter(h => h.getAttribute('aria-pressed') === 'true')
+          .forEach(h => {
+            h.setAttribute('aria-pressed', 'false');
+            h.setAttribute('data-drag-on', 'false');
+            h.classList.remove(activeClass);
+          });
+
+        handle.setAttribute('aria-pressed', `${!wasPressed}`);
+        handle.setAttribute('data-drag-on', `${!wasPressed}`);
+
+        const thisItem = this.items.find(itm => {
+          return itm === handle || itm.contains(handle);
+        });
+        // const thisItem = closest(handle, `ul${item}`, true);
+        this.announcement(type, thisItem);
+        this.emit(type, this.container, thisItem);
+
+        // configure classes (active and inactive)
+        this.items.forEach(it => {
+          const method = !wasPressed ? 'add' : 'remove';
+          const isTarget = it === handle || it.contains(handle);
+
+          it.classList[(isTarget && !wasPressed) ? 'add' : 'remove'](activeClass);
+          it.classList[(isTarget && !wasPressed) ? 'remove' : method](inactiveClass);
         });
 
-      handle.setAttribute('aria-pressed', `${!wasPressed}`);
-      handle.setAttribute('data-drag-on', `${!wasPressed}`);
-
-      const thisItem = closest(handle, item, true);
-      this.announcement(type, thisItem);
-      this.emit(type, this.container, thisItem);
-
-      // configure classes (active and inactive)
-      this.items.forEach(it => {
-        const method = !wasPressed ? 'add' : 'remove';
-        const isTarget = it === handle || it.contains(handle);
-
-        it.classList[(isTarget && !wasPressed) ? 'add' : 'remove'](activeClass);
-        it.classList[(isTarget && !wasPressed) ? 'remove' : method](inactiveClass);
+        if (!wasPressed) {
+          // cache the initial order to allow for escape cancellation
+          this.cachedItems = queryAll(this.options.item, this.container);
+        }
       });
-
-      if (!wasPressed) {
-        // cache the initial order to allow for escape cancellation
-        this.cachedItems = queryAll(this.options.item, this.container);
-      }
     });
 
     return this;
@@ -247,15 +304,17 @@ export default class DragonDrop {
   }
 
   mouseEvents() {
-    this.dragula.on('drag', el => {
-      this.announcement('grabbed', el);
-    });
+    const { nested } = this.options;
 
-    this.dragula.on('drop', el => {
-      this
-        .announcement('dropped', el)
-        .setItems();
-    });
+    if (!nested) {
+      this.dragula.on('drag', el => {
+        this.announcement('grabbed', el);
+      });
+
+      this.dragula.on('drop', el => {
+        this.announcement('dropped', el).setItems();
+      });
+    }
 
     return this;
   }

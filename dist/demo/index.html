@@ -115,7 +115,7 @@
           <li class="top-level"><span>About Us</span></li>
           <li class="top-level">
             <span>Products</span>
-            <ul id="sub-1">
+            <ul id="sub-1" class="sublist">
               <li><span>Product 1</span></li>
               <li><span>Product 2</span></li>
               <li><span>Product 3</span></li>
@@ -123,7 +123,7 @@
           </li>
           <li class="top-level">
             <span>Events</span>
-            <ul id="sub-2">
+            <ul id="sub-2" class="sublist">
               <li><span>Event 1</span></li>
               <li><span>Event 2</span></li>
               <li><span>Event 3</span></li>
@@ -131,7 +131,7 @@
           </li>
           <li class="top-level">
             <span>Resources</span>
-            <ul id="sub-3">
+            <ul id="sub-3" class="sublist">
               <li><span>Resource 1</span></li>
               <li><span>Resource 2</span></li>
               <li><span>Resource 3</span></li>
@@ -142,33 +142,30 @@
           <code data-language="js">
     import DragonDrop from 'dragon-drop';
 
-    const demo3 = document.getElementById('demo-3');
-    const sublist1 = document.getElementById('sub-1');
-    const sublist2 = document.getElementById('sub-2');
-    const sublist3 = document.getElementById('sub-3');
-    const config = {
-      nested: true,
+    var lists = Array.prototype.slice.call(document.querySelectorAll('#demo-3, .sublist'));
+    var dragons = new DragonDrop(lists, {
       handle: false,
+      nested: true,
+      item: ':scope > li',
       announcement: {
-        grabbed: el => `${el.querySelector('span').innerText} grabbed`,
-        dropped: el => `${el.querySelector('span')} dropped`,
-        reorder: (el, items) => {
-          const pos = items.indexOf(el) + 1;
-          const text = el.querySelector('span').innerText;
-          return `The rankings have been updated, ${text} is now ${pos} of ${items.length}`;
+        grabbed: function (el) { return el.querySelector('span').innerText + ' grabbed'; },
+        dropped: function (el) { return el.querySelector('span').innerText + ' dropped'; },
+        reorder: function (el, items) {
+          var pos = items.indexOf(el) + 1;
+          var text = el.querySelector('span').innerText;
+          return 'The order has changed, ' + text + ' is now item ' + pos + ' of ' + items.length;
         },
-        cancel: 'Reranking cancelled.'
+        cancel: function () { return 'Reorder cancelled.'; }
       }
-    };
-
-    new DragonDrop(demo3, {
-      ...config,
-      item: '.top-level' // important so we don't target the sub lis
     });
 
-    new dragonDrop(sublist1, config);
-    new dragonDrop(sublist2, config);
-    new dragonDrop(sublist3, config);
+    // when we pass DragonDrop an array, we get an array of instances back
+    dragons.forEach(dragon => {
+      dragon
+        .on('grabbed', function (container, item) { console.log('grabbed: ', item); })
+        .on('dropped', function (container, item) { console.log('dropped: ', item); })
+        .on('reorder', function (container, item) { console.log('reorder: ', item); })
+    });
           </code>
         </pre>
       </section>
@@ -226,9 +223,11 @@
 
       demo2.on('announcement', onAnnouncement);
 
-      var demo3Config = {
+      var demo3lists = Array.prototype.slice.call(document.querySelectorAll('#demo-3, .sublist'));
+      var demo3Dragons = new DragonDrop(demo3lists, {
         handle: false,
         nested: true,
+        item: ':scope > li',
         announcement: {
           grabbed: function (el) { return el.querySelector('span').innerText + ' grabbed'; },
           dropped: function (el) { return el.querySelector('span').innerText + ' dropped'; },
@@ -239,27 +238,11 @@
           },
           cancel: function () { return 'Reorder cancelled.'; }
         }
-      };
-
-      var demo3 = new DragonDrop(document.getElementById('demo-3'), {
-        handle: false,
-        nested: true,
-        item: '.top-level',
-        announcement: demo3Config.announcement
       });
-      demo3.on('announcement', onAnnouncement);
 
-      var demo3a = new DragonDrop(document.getElementById('sub-1'), demo3Config);
-      demo3a.on('announcement', onAnnouncement);
-
-      var demo3b = new DragonDrop(document.getElementById('sub-2'), demo3Config);
-      demo3b.on('announcement', onAnnouncement);
-
-      var demo3c = new DragonDrop(document.getElementById('sub-3'), demo3Config);
-      demo3c.on('announcement', onAnnouncement);
+      demo3Dragons.forEach(instance => instance.on('announcement', onAnnouncement));
 
       var checkbox = document.getElementById('display-region');
-
       checkbox.addEventListener('change', function () {
         liveLog.classList.toggle('active');
       });

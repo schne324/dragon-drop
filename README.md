@@ -1,6 +1,6 @@
 # Dragon Drop
 
-Keyboard accessible drag-and-drop reorder list.
+Keyboard/assistive technology accessible drag-and-drop reorder list.
 
 <img alt="Dragon Drop" src="/demo/dragondrop_sticker.png" width="400" />
 
@@ -86,55 +86,86 @@ https://unpkg.com/drag-on-drop
 
 ### `new DragonDrop(container, [options])`
 
-#### `container` (required)
-The one and only required parameter is the list HTMLElement that contains the sortable items.
+#### `container` _HTMLElement|Array_ (required)
+
+Either a single container element or an array of container elements.
 
 #### `options` _Object_ (optional)
 
 ##### `item` _String_
+
 The selector for the drag items (qualified within container). Defaults to
 ```js
 'li'
 ```
 
 ##### `handle` _String_
+
 The selector for the keyboard handle (qualified within the container and the selector provided for `item`). If set to `false`, the entire item will be used as the handle. Defaults to
 ```ks
 'button'
 ```
 
 ##### `activeClass` _String_
+
 The class to be added to the item being dragged. Defaults to
+
 ```js
 'dragon-active'
 ```
 
 ##### `inactiveClass` _String_
+
 The class to be added to all of the other items when an item is being dragged. Defaults
+
 ```js
 'dragon-inactive'
 ```
 
 ##### `nested` _Boolean_
-Set to true if nested lists are being used (click and keydown events will not bubble up (`e.stopPropagation()` will be applied))
+
+Set to true if nested lists are being used (click and keydown events will not bubble up (`e.stopPropagation()` will be applied)). For nested lists, you MUST pass `DragonDrop` an array of containers as the 1st parameter (see example below).
+
+__NOTE:__ *there is a 99% chance that you'll need to use [:scope selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/:scope) to target only a given list's items (because dragon drop would otherwise include the sub list's items for example). Using `:scope` selectors will allow you to target direct descendant children (example: `:scope > li`).*
+
+```js
+const lists = Array.from(document.querySelectorAll('.dragon-list'));
+const dragons = new DragonDrop(lists, {
+  nested: true,
+  handle: false,
+  item: ':scope > li' // IMPORTANT! a selector that targets only a single list's items
+});
+const [ topLevel, sublist1, sublist2 ] = dragons;
+
+topLevel.on('grabbed', () => console.log('top-most container item grabbed'));
+sublist1.on('grabbed', () => console.log('sublist 1 item grabbed'));
+sublist2.on('grabbed', () => console.log('sublist 1 item grabbed'));
+```
 
 ##### `announcement` _Object_
+
 The live region announcement configuration object containing the following properties:
 
 ###### `grabbed` _Function_
+
 The function called when an item is picked up. The currently grabbed element along with an array of all items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
+
 ```js
 el => `Item ${el.innerText} grabbed`
 ```
 
 ###### `dropped` _Function_
+
 The function called when an item is dropped. The newly dropped item along with an array of all items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
+
 ```js
 el => `Item ${el.innerText} dropped`
 ```
 
 ###### `reorder` _Function_
+
 The function called when the list has been reordered. The newly dropped item along with an array of items are passed as arguments respectively. The function should return a string of text to be announced in the live region. Defaults to
+
 ```js
 (el, items) => {
   const pos = items.indexOf(el) + 1;
@@ -144,19 +175,24 @@ The function called when the list has been reordered. The newly dropped item alo
 ```
 
 ###### `cancel` _Function_
+
 The function called when the reorder is cancelled (via ESC). No arguments passed in. Defaults to
+
 ```js
 () => 'Reordering cancelled'
 ```
 
 ## Properties
+
 ```js
 const dragonDrop = new DragonDrop(container);
 ```
 ### `dragonDrop.items` _Array_
+
 An array of each of the sortable item element references.
 
 ### `dragonDrop.handles` _Array_
+
 An array of each of the handle item element references. If instance doesn't have handles, this will be identical to `dragonDrop.items`.
 
 ### Example with options
@@ -180,15 +216,19 @@ const dragonDrop = new DragonDrop(list, {
 ```
 
 ## Events
+
 Dragon drop emit events when important stuff happens.
 
 ### `dragonDrop.on('grabbed', callback)`
+
 Fires when an item is grabbed (with keyboard or mouse). The callback is passed the container along with the grabbed item.
 
 ### `dragonDrop.on('dropped', callback)`
+
 Fires when an item is dropped (with keyboard or mouse). The callback is passed the container and the grabbed item.
 
 ### `dragonDrop.on('reorder', callback)`
+
 Fires when an list is reordered. The callback is passed the container along with the item.
 
 ### Example use of events
