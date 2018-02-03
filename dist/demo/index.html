@@ -81,11 +81,11 @@
         <h3 id="schedule-head">Today's schedule</h3>
         <p>Without drag handle (entire item is draggable - including with the keyboard!)</p>
         <ul id="demo-2" aria-labelledby="schedule-head">
-          <li><span class="offscreen">Reorder</span><div>Stand-up</div></li>
-          <li><span class="offscreen">Reorder</span><div>Sprint planning</div></li>
-          <li><span class="offscreen">Reorder</span><div>Retrospective</div></li>
-          <li><span class="offscreen">Reorder</span><div>Backlog grooming</div></li>
-          <li><span class="offscreen">Reorder</span><div>End of sprint demo</div></li>
+          <li aria-describedby="global-help"><span class="offscreen">Reorder</span><div>Stand-up</div></li>
+          <li aria-describedby="global-help"><span class="offscreen">Reorder</span><div>Sprint planning</div></li>
+          <li aria-describedby="global-help"><span class="offscreen">Reorder</span><div>Retrospective</div></li>
+          <li aria-describedby="global-help"><span class="offscreen">Reorder</span><div>Backlog grooming</div></li>
+          <li aria-describedby="global-help"><span class="offscreen">Reorder</span><div>End of sprint demo</div></li>
         </ul>
         <pre>
           <code data-language="js">
@@ -111,30 +111,30 @@
       <section>
         <h3 id="nested">Nested lists</h3>
         <ul id="demo-3">
-          <li class="top-level"><span>Home</span></li>
-          <li class="top-level"><span>About Us</span></li>
-          <li class="top-level">
+          <li class="top-level" aria-describedby="global-help"><span>Home</span></li>
+          <li class="top-level" aria-describedby="global-help"><span>About Us</span></li>
+          <li class="top-level" aria-describedby="global-help">
             <span>Products</span>
             <ul id="sub-1" class="sublist">
-              <li><span>Product 1</span></li>
-              <li><span>Product 2</span></li>
-              <li><span>Product 3</span></li>
+              <li aria-describedby="global-help"><span>Product 1</span></li>
+              <li aria-describedby="global-help"><span>Product 2</span></li>
+              <li aria-describedby="global-help"><span>Product 3</span></li>
             </ul>
           </li>
-          <li class="top-level">
+          <li class="top-level" aria-describedby="global-help">
             <span>Events</span>
             <ul id="sub-2" class="sublist">
-              <li><span>Event 1</span></li>
-              <li><span>Event 2</span></li>
-              <li><span>Event 3</span></li>
+              <li aria-describedby="global-help"><span>Event 1</span></li>
+              <li aria-describedby="global-help"><span>Event 2</span></li>
+              <li aria-describedby="global-help"><span>Event 3</span></li>
             </ul>
           </li>
-          <li class="top-level">
+          <li class="top-level" aria-describedby="global-help">
             <span>Resources</span>
             <ul id="sub-3" class="sublist">
-              <li><span>Resource 1</span></li>
-              <li><span>Resource 2</span></li>
-              <li><span>Resource 3</span></li>
+              <li aria-describedby="global-help"><span>Resource 1</span></li>
+              <li aria-describedby="global-help"><span>Resource 2</span></li>
+              <li aria-describedby="global-help"><span>Resource 3</span></li>
             </ul>
           </li>
         </ul>
