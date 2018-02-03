@@ -7,6 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+require('element-qsa-scope');
+
 var _dragula = require('dragula');
 
 var _dragula2 = _interopRequireDefault(_dragula);
@@ -14,14 +16,6 @@ var _dragula2 = _interopRequireDefault(_dragula);
 var _liveRegion = require('live-region');
 
 var _liveRegion2 = _interopRequireDefault(_liveRegion);
-
-var _closest = require('closest');
-
-var _closest2 = _interopRequireDefault(_closest);
-
-var _delegate = require('delegate');
-
-var _delegate2 = _interopRequireDefault(_delegate);
 
 var _mergeOptions = require('merge-options');
 
@@ -52,6 +46,63 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var debug = (0, _debug2.default)('drag-on-drop:index');
+var arrayHandler = function arrayHandler(containers) {
+  var userOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var nested = userOptions.nested;
+
+  var instances = [];
+
+  containers.forEach(function (container) {
+    instances.push(new DragonDrop(container, userOptions, nested));
+  });
+
+  if (nested) {
+    var onDrag = function onDrag(el, source) {
+      var instance = instances.find(function (inst) {
+        return inst.container === source;
+      });
+      if (instance) {
+        instance.announcement('grabbed', el);
+      }
+    };
+    var onDrop = function onDrop(el, source) {
+      var instance = instances.find(function (inst) {
+        return inst.container === source;
+      });
+      if (instance) {
+        instance.announcement('dropped', el).setItems();
+      }
+    };
+
+    var topMost = containers[0];
+    var lists = Array.from(containers);
+    lists.shift(); // remove the top-most conatainer
+
+    var topLevelDragula = (0, _dragula2.default)([topMost], {
+      moves: function moves(_, __, handle) {
+        return !lists.find(function (l) {
+          return l.contains(handle);
+        });
+      }
+    });
+
+    topLevelDragula.on('drag', onDrag);
+    topLevelDragula.on('drop', onDrop);
+
+    var nestedDragula = (0, _dragula2.default)(lists, {
+      accepts: function accepts(el, target, source) {
+        // TODO: when `options.locked` is implemented...
+        // if (!options.locked) { return true }
+        return target === source;
+      }
+    });
+
+    nestedDragula.on('drag', onDrag);
+    nestedDragula.on('drop', onDrop);
+  }
+
+  return instances;
+};
 
 var DragonDrop = function () {
   /**
@@ -88,23 +139,34 @@ var DragonDrop = function () {
    * @option {Function} announcement.cancel - The function called when the reorder is cancelled
    *                                          (via ESC). No arguments passed in.
    */
-  function DragonDrop(container, userOptions) {
-    var _this = this;
+  function DragonDrop(container) {
+    var userOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     _classCallCheck(this, DragonDrop);
 
+    if (Array.isArray(container)) {
+      return arrayHandler(container, userOptions);
+    }
     // make the dragon an emitter
     (0, _componentEmitter2.default)(this);
-
     this.initOptions(userOptions);
-    // if handle is truthy, pass this info along with
-    var dragulaOpts = this.options.handle && {
-      moves: function moves(_, __, handle) {
-        return (0, _domMatches2.default)(handle, _this.options.handle);
-      }
-    };
-    // init mouse drag via dragula
-    this.dragula = (0, _dragula2.default)([container], dragulaOpts);
+
+    var _options = this.options,
+        handle = _options.handle,
+        nested = _options.nested;
+
+
+    if (!nested) {
+      // if handle is truthy, pass this info along with
+      var dragulaOpts = handle && {
+        moves: function moves(_, __, h) {
+          return (0, _domMatches2.default)(h, handle);
+        }
+      };
+      // init mouse drag via dragula
+      this.dragula = (0, _dragula2.default)([container], dragulaOpts);
+    }
+
     // init live region for custom announcements
     this.liveRegion = new _liveRegion2.default({
       ariaLive: 'assertive',
@@ -113,6 +175,7 @@ var DragonDrop = function () {
     });
 
     this.onKeydown = this.onKeydown.bind(this);
+
     // initialize elements / events
     this.initElements(container).mouseEvents().initClick();
 
@@ -130,7 +193,6 @@ var DragonDrop = function () {
   _createClass(DragonDrop, [{
     key: 'initOptions',
     value: function initOptions(userOptions) {
-      userOptions = userOptions || {};
       userOptions.announcement = userOptions.announcement || {};
       this.options = (0, _mergeOptions2.default)({}, _defaults2.default, userOptions);
 
@@ -139,50 +201,56 @@ var DragonDrop = function () {
   }, {
     key: 'initClick',
     value: function initClick() {
-      var _this2 = this;
+      var _this = this;
 
-      var _options = this.options,
-          activeClass = _options.activeClass,
-          inactiveClass = _options.inactiveClass,
-          item = _options.item;
+      var _options2 = this.options,
+          activeClass = _options2.activeClass,
+          inactiveClass = _options2.inactiveClass,
+          nested = _options2.nested;
 
-      var sel = this.options.handle ? item + ' ' + this.options.handle : item;
 
-      (0, _delegate2.default)(this.container, sel, 'click', function (e) {
-        var handle = e.delegateTarget;
-        var wasPressed = handle.getAttribute('data-drag-on') === 'true';
-        var type = wasPressed ? 'dropped' : 'grabbed';
+      this.handles.forEach(function (handle) {
+        handle.addEventListener('click', function (e) {
+          if (nested) {
+            e.stopPropagation();
+          }
+          var wasPressed = handle.getAttribute('data-drag-on') === 'true';
+          var type = wasPressed ? 'dropped' : 'grabbed';
 
-        // clean up
-        _this2.handles // TODO: This can probably be tied into the below items iteration
-        .filter(function (h) {
-          return h.getAttribute('aria-pressed') === 'true';
-        }).forEach(function (h) {
-          h.setAttribute('aria-pressed', 'false');
-          h.setAttribute('data-drag-on', 'false');
-          h.classList.remove(activeClass);
+          // clean up
+          _this.handles // TODO: This can probably be tied into the below items iteration
+          .filter(function (h) {
+            return h.getAttribute('aria-pressed') === 'true';
+          }).forEach(function (h) {
+            h.setAttribute('aria-pressed', 'false');
+            h.setAttribute('data-drag-on', 'false');
+            h.classList.remove(activeClass);
+          });
+
+          handle.setAttribute('aria-pressed', '' + !wasPressed);
+          handle.setAttribute('data-drag-on', '' + !wasPressed);
+
+          var thisItem = _this.items.find(function (itm) {
+            return itm === handle || itm.contains(handle);
+          });
+          // const thisItem = closest(handle, `ul${item}`, true);
+          _this.announcement(type, thisItem);
+          _this.emit(type, _this.container, thisItem);
+
+          // configure classes (active and inactive)
+          _this.items.forEach(function (it) {
+            var method = !wasPressed ? 'add' : 'remove';
+            var isTarget = it === handle || it.contains(handle);
+
+            it.classList[isTarget && !wasPressed ? 'add' : 'remove'](activeClass);
+            it.classList[isTarget && !wasPressed ? 'remove' : method](inactiveClass);
+          });
+
+          if (!wasPressed) {
+            // cache the initial order to allow for escape cancellation
+            _this.cachedItems = (0, _queryAll2.default)(_this.options.item, _this.container);
+          }
         });
-
-        handle.setAttribute('aria-pressed', '' + !wasPressed);
-        handle.setAttribute('data-drag-on', '' + !wasPressed);
-
-        var thisItem = (0, _closest2.default)(handle, item, true);
-        _this2.announcement(type, thisItem);
-        _this2.emit(type, _this2.container, thisItem);
-
-        // configure classes (active and inactive)
-        _this2.items.forEach(function (it) {
-          var method = !wasPressed ? 'add' : 'remove';
-          var isTarget = it === handle || it.contains(handle);
-
-          it.classList[isTarget && !wasPressed ? 'add' : 'remove'](activeClass);
-          it.classList[isTarget && !wasPressed ? 'remove' : method](inactiveClass);
-        });
-
-        if (!wasPressed) {
-          // cache the initial order to allow for escape cancellation
-          _this2.cachedItems = (0, _queryAll2.default)(_this2.options.item, _this2.container);
-        }
       });
 
       return this;
@@ -196,7 +264,7 @@ var DragonDrop = function () {
   }, {
     key: 'initElements',
     value: function initElements(container) {
-      var _this3 = this;
+      var _this2 = this;
 
       this.container = container;
       this.setItems();
@@ -208,10 +276,9 @@ var DragonDrop = function () {
         if (handle.tagName !== 'BUTTON') {
           handle.setAttribute('role', 'button');
         }
-
         // events
-        handle.removeEventListener('keydown', _this3.onKeydown);
-        handle.addEventListener('keydown', _this3.onKeydown);
+        handle.removeEventListener('keydown', _this2.onKeydown);
+        handle.addEventListener('keydown', _this2.onKeydown);
       });
 
       return this;
@@ -228,6 +295,7 @@ var DragonDrop = function () {
   }, {
     key: 'onKeydown',
     value: function onKeydown(e) {
+      var nested = this.options.nested;
       var target = e.target,
           which = e.which;
 
@@ -238,6 +306,9 @@ var DragonDrop = function () {
       switch (which) {
         case 13:
         case 32:
+          if (nested) {
+            e.stopPropagation();
+          }
           e.preventDefault();
           target.click();
 
@@ -276,13 +347,12 @@ var DragonDrop = function () {
       var index = handles.indexOf(target);
       var adjacentIndex = isUp ? index - 1 : index + 1;
       var adjacentItem = handles[adjacentIndex];
+      var oldItem = items[index];
 
-      if (!adjacentItem) {
-        // prevents circularity
+      if (!adjacentItem || !oldItem) {
         return;
       }
 
-      var oldItem = items[index];
       var newItem = items[adjacentIndex];
       var refNode = isUp ? newItem : newItem.nextElementSibling;
       // move the item in the DOM
@@ -311,28 +381,33 @@ var DragonDrop = function () {
   }, {
     key: 'mouseEvents',
     value: function mouseEvents() {
-      var _this4 = this;
+      var _this3 = this;
 
-      this.dragula.on('drag', function (el) {
-        _this4.announcement('grabbed', el);
-      });
+      var nested = this.options.nested;
 
-      this.dragula.on('drop', function (el) {
-        _this4.announcement('dropped', el).setItems();
-      });
+
+      if (!nested) {
+        this.dragula.on('drag', function (el) {
+          _this3.announcement('grabbed', el);
+        });
+
+        this.dragula.on('drop', function (el) {
+          _this3.announcement('dropped', el).setItems();
+        });
+      }
 
       return this;
     }
   }, {
     key: 'cancel',
     value: function cancel() {
-      var _this5 = this;
+      var _this4 = this;
 
       // cache active element so it can be focused after reorder
       var focused = document.activeElement;
       // restore the order of the list
       this.cachedItems.forEach(function (item) {
-        return _this5.container.appendChild(item);
+        return _this4.container.appendChild(item);
       });
       this.items = this.cachedItems;
       // ensure the handle stays focused
@@ -352,7 +427,7 @@ var DragonDrop = function () {
 exports.default = DragonDrop;
 module.exports = DragonDrop;
 
-},{"./lib/defaults":2,"./lib/query-all":3,"closest":5,"component-emitter":6,"debug":12,"delegate":15,"dom-matches":16,"dragula":18,"live-region":20,"merge-options":22}],2:[function(require,module,exports){
+},{"./lib/defaults":2,"./lib/query-all":3,"component-emitter":5,"debug":11,"dom-matches":13,"dragula":15,"element-qsa-scope":16,"live-region":18,"merge-options":19}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -363,6 +438,7 @@ var defaults = {
   handle: 'button', // qualified within `item`
   activeClass: 'dragon-active', // added to item being dragged
   inactiveClass: 'dragon-inactive', // added to other items when item is being dragged
+  nested: false, // if true, stops propagation on keydown / click events
   announcement: {
     grabbed: function grabbed(el) {
       return 'Item ' + el.innerText + ' grabbed';
@@ -398,18 +474,6 @@ exports.default = queryAll;
 module.exports = function atoa (a, n) { return Array.prototype.slice.call(a, n); }
 
 },{}],5:[function(require,module,exports){
-var matches = require('matches-selector')
-
-module.exports = function (element, selector, checkYoSelf) {
-  var parent = checkYoSelf ? element : element.parentNode
-
-  while (parent && parent !== document) {
-    if (matches(parent, selector)) return parent;
-    parent = parent.parentNode
-  }
-}
-
-},{"matches-selector":21}],6:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -574,7 +638,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var ticky = require('ticky');
@@ -586,7 +650,7 @@ module.exports = function debounce (fn, args, ctx) {
   });
 };
 
-},{"ticky":25}],8:[function(require,module,exports){
+},{"ticky":22}],7:[function(require,module,exports){
 'use strict';
 
 var atoa = require('atoa');
@@ -642,7 +706,7 @@ module.exports = function emitter (thing, options) {
   return thing;
 };
 
-},{"./debounce":7,"atoa":4}],9:[function(require,module,exports){
+},{"./debounce":6,"atoa":4}],8:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -747,7 +811,7 @@ function find (el, type, fn) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./eventmap":10,"custom-event":11}],10:[function(require,module,exports){
+},{"./eventmap":9,"custom-event":10}],9:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -764,7 +828,7 @@ for (eventname in global) {
 module.exports = eventmap;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (global){
 
 var NativeCustomEvent = global.CustomEvent;
@@ -816,7 +880,7 @@ function CustomEvent (type, params) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (process){
 /**
  * This is the web browser implementation of `debug()`.
@@ -1015,7 +1079,7 @@ function localstorage() {
 }
 
 }).call(this,require('_process'))
-},{"./debug":13,"_process":24}],13:[function(require,module,exports){
+},{"./debug":12,"_process":21}],12:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1242,122 +1306,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":23}],14:[function(require,module,exports){
-var DOCUMENT_NODE_TYPE = 9;
-
-/**
- * A polyfill for Element.matches()
- */
-if (typeof Element !== 'undefined' && !Element.prototype.matches) {
-    var proto = Element.prototype;
-
-    proto.matches = proto.matchesSelector ||
-                    proto.mozMatchesSelector ||
-                    proto.msMatchesSelector ||
-                    proto.oMatchesSelector ||
-                    proto.webkitMatchesSelector;
-}
-
-/**
- * Finds the closest parent that matches a selector.
- *
- * @param {Element} element
- * @param {String} selector
- * @return {Function}
- */
-function closest (element, selector) {
-    while (element && element.nodeType !== DOCUMENT_NODE_TYPE) {
-        if (typeof element.matches === 'function' &&
-            element.matches(selector)) {
-          return element;
-        }
-        element = element.parentNode;
-    }
-}
-
-module.exports = closest;
-
-},{}],15:[function(require,module,exports){
-var closest = require('./closest');
-
-/**
- * Delegates event to a selector.
- *
- * @param {Element} element
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @param {Boolean} useCapture
- * @return {Object}
- */
-function _delegate(element, selector, type, callback, useCapture) {
-    var listenerFn = listener.apply(this, arguments);
-
-    element.addEventListener(type, listenerFn, useCapture);
-
-    return {
-        destroy: function() {
-            element.removeEventListener(type, listenerFn, useCapture);
-        }
-    }
-}
-
-/**
- * Delegates event to a selector.
- *
- * @param {Element|String|Array} [elements]
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @param {Boolean} useCapture
- * @return {Object}
- */
-function delegate(elements, selector, type, callback, useCapture) {
-    // Handle the regular Element usage
-    if (typeof elements.addEventListener === 'function') {
-        return _delegate.apply(null, arguments);
-    }
-
-    // Handle Element-less usage, it defaults to global delegation
-    if (typeof type === 'function') {
-        // Use `document` as the first parameter, then apply arguments
-        // This is a short way to .unshift `arguments` without running into deoptimizations
-        return _delegate.bind(null, document).apply(null, arguments);
-    }
-
-    // Handle Selector-based usage
-    if (typeof elements === 'string') {
-        elements = document.querySelectorAll(elements);
-    }
-
-    // Handle Array-like based usage
-    return Array.prototype.map.call(elements, function (element) {
-        return _delegate(element, selector, type, callback, useCapture);
-    });
-}
-
-/**
- * Finds closest match and invokes callback.
- *
- * @param {Element} element
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @return {Function}
- */
-function listener(element, selector, type, callback) {
-    return function(e) {
-        e.delegateTarget = closest(e.target, selector);
-
-        if (e.delegateTarget) {
-            callback.call(element, e);
-        }
-    }
-}
-
-module.exports = delegate;
-
-},{"./closest":14}],16:[function(require,module,exports){
+},{"ms":20}],13:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1408,7 +1357,7 @@ function matches(elem, selector) {
 
 module.exports = matches;
 
-},{}],17:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var cache = {};
@@ -1443,7 +1392,7 @@ module.exports = {
   rm: rmClass
 };
 
-},{}],18:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2055,7 +2004,68 @@ function getCoord (coord, e) {
 module.exports = dragula;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./classes":17,"contra/emitter":8,"crossvent":9}],19:[function(require,module,exports){
+},{"./classes":14,"contra/emitter":7,"crossvent":8}],16:[function(require,module,exports){
+try {
+	// test for scope support
+	document.createElement('a').querySelector(':scope *');
+} catch (error) {
+	(function () {
+		// scope regex
+		var scope = /:scope\b/gi;
+
+		// polyfilled <Element>.querySelector
+		var querySelectorWithScope = polyfill(Element.prototype.querySelector);
+
+		Element.prototype.querySelector = function querySelector(selectors) {
+			return querySelectorWithScope.apply(this, arguments);
+		};
+
+		// polyfilled <Element>.querySelectorAll
+		var querySelectorAllWithScope = polyfill(Element.prototype.querySelectorAll);
+
+		Element.prototype.querySelectorAll = function querySelectorAll(selectors) {
+			return querySelectorAllWithScope.apply(this, arguments);
+		};
+
+		function polyfill(originalQuerySelector) {
+			return function (selectors) {
+				// whether selectors contain :scope
+				var hasScope = selectors && scope.test(selectors);
+
+				if (hasScope) {
+					// element id
+					var id = this.getAttribute('id');
+
+					if (!id) {
+						// update id if falsey or missing
+						this.id = 'q' + Math.floor(Math.random() * 9000000) + 1000000;
+					}
+
+					// modify arguments
+					arguments[0] = selectors.replace(scope, '#' + this.id);
+
+					// result of the original query selector
+					var elementOrNodeList = originalQuerySelector.apply(this, arguments);
+
+					if (id === null) {
+						// remove id if missing
+						this.removeAttribute('id');
+					} else if (!id) {
+						// restore id if falsey
+						this.id = id;
+					}
+
+					return elementOrNodeList;
+				} else {
+					// result of the original query sleector
+					return originalQuerySelector.apply(this, arguments);
+				}
+			};
+		}
+	})();
+}
+
+},{}],17:[function(require,module,exports){
 'use strict';
 var toString = Object.prototype.toString;
 
@@ -2064,7 +2074,7 @@ module.exports = function (x) {
 	return toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));
 };
 
-},{}],20:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2139,48 +2149,7 @@ if (typeof module !== 'undefined') {
   module.exports = LiveRegion;
 }
 
-},{}],21:[function(require,module,exports){
-
-/**
- * Element prototype.
- */
-
-var proto = Element.prototype;
-
-/**
- * Vendor function.
- */
-
-var vendor = proto.matchesSelector
-  || proto.webkitMatchesSelector
-  || proto.mozMatchesSelector
-  || proto.msMatchesSelector
-  || proto.oMatchesSelector;
-
-/**
- * Expose `match()`.
- */
-
-module.exports = match;
-
-/**
- * Match `el` to `selector`.
- *
- * @param {Element} el
- * @param {String} selector
- * @return {Boolean}
- * @api public
- */
-
-function match(el, selector) {
-  if (vendor) return vendor.call(el, selector);
-  var nodes = el.parentNode.querySelectorAll(selector);
-  for (var i = 0; i < nodes.length; ++i) {
-    if (nodes[i] == el) return true;
-  }
-  return false;
-}
-},{}],22:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 const isOptionObject = require('is-plain-obj');
 
@@ -2337,7 +2306,7 @@ module.exports = function () {
 	return merged;
 };
 
-},{"is-plain-obj":19}],23:[function(require,module,exports){
+},{"is-plain-obj":17}],20:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -2491,7 +2460,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],24:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -2677,7 +2646,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],25:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var si = typeof setImmediate === 'function', tick;
 if (si) {
   tick = function (fn) { setImmediate(fn); };
