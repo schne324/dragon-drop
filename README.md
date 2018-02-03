@@ -88,7 +88,7 @@ https://unpkg.com/drag-on-drop
 
 #### `container` _HTMLElement|Array_ (required)
 
-Either an single container element or an array of container elements.
+Either a single container element or an array of container elements.
 
 #### `options` _Object_ (optional)
 
