@@ -24,7 +24,7 @@ const ddWithoutDragger = new DragonDrop(wod, {
   item: '.without-dragger-item',
   handle: false
 });
-const ddTopLevel = new DragonDrop(nested, {
+new DragonDrop(nested, {
   handle: false,
   nested: true,
   item: '.top-level'
