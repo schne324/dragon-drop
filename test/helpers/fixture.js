@@ -3,6 +3,7 @@ export default class Fixture {
   constructor() {
     this.withoutDragger = document.createElement('div');
     this.withDragger = document.createElement('div');
+    this.nested = document.createElement('div');
 
     this.withoutDragger.innerHTML = `
       <ul id="without-dragger">
@@ -20,12 +21,29 @@ export default class Fixture {
       </ul>
     `;
 
+    this.nested.innerHTML = `
+      <ul id="nested">
+        <li class="top-level">Hello</li>
+        <li class="top-level">World</li>
+        <li class="top-level">
+          <span>With sublist</span>
+          <ul id="sublist">
+            <li>Subitem</li>
+            <li>Subitem</li>
+            <li>Subitem</li>
+          </ul>
+        </li>
+      </ul>
+    `;
+
     document.body.appendChild(this.withoutDragger);
     document.body.appendChild(this.withDragger);
+    document.body.appendChild(this.nested);
   }
 
   destroy() {
     document.body.removeChild(this.withoutDragger);
     document.body.removeChild(this.withDragger);
+    document.body.removeChild(this.nested);
   }
 }

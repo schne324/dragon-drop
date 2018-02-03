@@ -148,7 +148,6 @@ export default class DragonDrop {
       if (handle.tagName !== 'BUTTON') {
         handle.setAttribute('role', 'button');
       }
-
       // events
       handle.removeEventListener('keydown', this.onKeydown);
       handle.addEventListener('keydown', this.onKeydown);

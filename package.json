@@ -12,7 +12,7 @@
     "deploy": "gh-pages -d dist/",
     "dev": "watch-run -p 'lib/**,demo/**,index.js' npm run build",
     "pre-build": "npm run clean && mkdir dist",
-    "test": "babel-tape-runner test/index.js | faucet"
+    "test": "babel-tape-runner test/index.js | tap-spec"
   },
   "repository": {
     "type": "git",
@@ -31,11 +31,11 @@
     "browserify": "^14.4.0",
     "cp-dir": "^1.0.3",
     "debug": "^3.0.0",
-    "faucet": "0.0.1",
     "gh-pages": "^1.0.0",
     "jsdom": "^11.2.0",
     "jsdom-global": "^3.0.2",
     "simulant": "^0.2.2",
+    "tap-spec": "^4.1.1",
     "tape": "^4.8.0",
     "uglifyify": "^4.0.3",
     "watch-run": "^1.2.5"
