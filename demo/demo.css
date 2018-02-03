@@ -150,6 +150,10 @@ li[aria-pressed="true"] {
   list-style: circle;
 }
 
+
+#demo-3 .top-level > span {
+  border-bottom: 1px solid;
+}
 .live-log {
   position: fixed;
   bottom: 0;
