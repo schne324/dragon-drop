@@ -111,11 +111,11 @@ li[aria-pressed="true"] {
   text-align: left;
   padding: 8px;
   border-bottom: 2px solid;
+  cursor: -webkit-grab;
 }
 
-#demo-2 li,
-#demo-3 li {
-  cursor: -webkit-grab;
+#demo li:active {
+  cursor: -webkit-grabbing;
 }
 
 #demo-2 li::before {
@@ -143,11 +143,6 @@ li[aria-pressed="true"] {
 
 #demo-2 li:nth-of-type(5)::before {
   content: '4:00pm';
-}
-
-#demo-3 {
-  text-align: left;
-  list-style: circle;
 }
 
 .live-log {
