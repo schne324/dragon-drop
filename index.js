@@ -90,10 +90,11 @@ export default class DragonDrop {
   }
 
   initClick() {
-    const { activeClass, inactiveClass, item } = this.options;
+    const { activeClass, inactiveClass, item, nested } = this.options;
     const sel = this.options.handle ? `${item} ${this.options.handle}` : item;
 
     delegate(this.container, sel, 'click', e => {
+      if (nested) { e.stopPropagation(); }
       const handle = e.delegateTarget;
       const wasPressed = handle.getAttribute('data-drag-on') === 'true';
       const type = wasPressed ? 'dropped' : 'grabbed';
@@ -147,7 +148,6 @@ export default class DragonDrop {
       if (handle.tagName !== 'BUTTON') {
         handle.setAttribute('role', 'button');
       }
-
       // events
       handle.removeEventListener('keydown', this.onKeydown);
       handle.addEventListener('keydown', this.onKeydown);
@@ -167,12 +167,14 @@ export default class DragonDrop {
   }
 
   onKeydown(e) {
+    const { nested } = this.options;
     const { target, which } = e;
     const isDrag = () => target.getAttribute('data-drag-on') === 'true';
 
     switch (which) {
       case 13:
       case 32:
+        if (nested) { e.stopPropagation(); }
         e.preventDefault();
         target.click();
 
@@ -210,12 +212,12 @@ export default class DragonDrop {
     const index = handles.indexOf(target);
     const adjacentIndex = isUp ? index - 1 : index + 1;
     const adjacentItem = handles[adjacentIndex];
+    const oldItem = items[index];
 
-    if (!adjacentItem) { // prevents circularity
+    if (!adjacentItem || !oldItem) {
       return;
     }
 
-    const oldItem = items[index];
     const newItem = items[adjacentIndex];
     const refNode = isUp ? newItem : newItem.nextElementSibling;
     // move the item in the DOM

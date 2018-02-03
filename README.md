@@ -115,6 +115,9 @@ The class to be added to all of the other items when an item is being dragged. D
 'dragon-inactive'
 ```
 
+##### `nested` _Boolean_
+Set to true if nested lists are being used (click and keydown events will not bubble up (`e.stopPropagation()` will be applied))
+
 ##### `announcement` _Object_
 The live region announcement configuration object containing the following properties:
 

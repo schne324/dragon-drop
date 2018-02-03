@@ -108,6 +108,70 @@
           </code>
         </pre>
       </section>
+      <section>
+        <h3 id="nested">Nested lists</h3>
+        <ul id="demo-3">
+          <li class="top-level"><span>Home</span></li>
+          <li class="top-level"><span>About Us</span></li>
+          <li class="top-level">
+            <span>Products</span>
+            <ul id="sub-1">
+              <li><span>Product 1</span></li>
+              <li><span>Product 2</span></li>
+              <li><span>Product 3</span></li>
+            </ul>
+          </li>
+          <li class="top-level">
+            <span>Events</span>
+            <ul id="sub-2">
+              <li><span>Event 1</span></li>
+              <li><span>Event 2</span></li>
+              <li><span>Event 3</span></li>
+            </ul>
+          </li>
+          <li class="top-level">
+            <span>Resources</span>
+            <ul id="sub-3">
+              <li><span>Resource 1</span></li>
+              <li><span>Resource 2</span></li>
+              <li><span>Resource 3</span></li>
+            </ul>
+          </li>
+        </ul>
+        <pre>
+          <code data-language="js">
+    import DragonDrop from 'dragon-drop';
+
+    const demo3 = document.getElementById('demo-3');
+    const sublist1 = document.getElementById('sub-1');
+    const sublist2 = document.getElementById('sub-2');
+    const sublist3 = document.getElementById('sub-3');
+    const config = {
+      nested: true,
+      handle: false,
+      announcement: {
+        grabbed: el => `${el.querySelector('span').innerText} grabbed`,
+        dropped: el => `${el.querySelector('span')} dropped`,
+        reorder: (el, items) => {
+          const pos = items.indexOf(el) + 1;
+          const text = el.querySelector('span').innerText;
+          return `The rankings have been updated, ${text} is now ${pos} of ${items.length}`;
+        },
+        cancel: 'Reranking cancelled.'
+      }
+    };
+
+    new DragonDrop(demo3, {
+      ...config,
+      item: '.top-level' // important so we don't target the sub lis
+    });
+
+    new dragonDrop(sublist1, config);
+    new dragonDrop(sublist2, config);
+    new dragonDrop(sublist3, config);
+          </code>
+        </pre>
+      </section>
       <div class="live-log" id="live-log"></div>
     </main>
     <script src="https://unpkg.com/rainbow-code/dist/rainbow.min.js"></script>
@@ -161,6 +225,38 @@
       });
 
       demo2.on('announcement', onAnnouncement);
+
+      var demo3Config = {
+        handle: false,
+        nested: true,
+        announcement: {
+          grabbed: function (el) { return el.querySelector('span').innerText + ' grabbed'; },
+          dropped: function (el) { return el.querySelector('span').innerText + ' dropped'; },
+          reorder: function (el, items) {
+            var pos = items.indexOf(el) + 1;
+            var text = el.querySelector('span').innerText;
+            return 'The order has changed, ' + text + ' is now item ' + pos + ' of ' + items.length;
+          },
+          cancel: function () { return 'Reorder cancelled.'; }
+        }
+      };
+
+      var demo3 = new DragonDrop(document.getElementById('demo-3'), {
+        handle: false,
+        nested: true,
+        item: '.top-level',
+        announcement: demo3Config.announcement
+      });
+      demo3.on('announcement', onAnnouncement);
+
+      var demo3a = new DragonDrop(document.getElementById('sub-1'), demo3Config);
+      demo3a.on('announcement', onAnnouncement);
+
+      var demo3b = new DragonDrop(document.getElementById('sub-2'), demo3Config);
+      demo3b.on('announcement', onAnnouncement);
+
+      var demo3c = new DragonDrop(document.getElementById('sub-3'), demo3Config);
+      demo3c.on('announcement', onAnnouncement);
 
       var checkbox = document.getElementById('display-region');
 

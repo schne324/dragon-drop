@@ -10,6 +10,8 @@ const fixture = new Fixture();
 
 const wd = document.getElementById('with-dragger');
 const wod = document.getElementById('without-dragger');
+const nested = document.getElementById('nested');
+const sublist = document.getElementById('sublist');
 const ddWithDragger = new DragonDrop(wd, {
   item: '.with-dragger-item',
   activeClass: 'foo-active',
@@ -21,6 +23,14 @@ const ddWithDragger = new DragonDrop(wd, {
 const ddWithoutDragger = new DragonDrop(wod, {
   item: '.without-dragger-item',
   handle: false
+});
+new DragonDrop(nested, {
+  handle: false,
+  nested: true,
+  item: '.top-level'
+});
+const ddSublist = new DragonDrop(sublist, {
+  nested: true
 });
 
 test('properly merges user options with defaults', t => {
@@ -235,7 +245,24 @@ test('cancels reorder and restores list to initial order when escape is pressed'
   t.is(item.getAttribute('aria-pressed'), 'false');
 });
 
+test('prevents click and keydown events from bubbling up given `nested: true`', t => {
+  t.plan(1);
+
+  let called = false;
+  ddSublist.onKeydown({
+    which: 32,
+    stopPropagation: () => called = true,
+    preventDefault: () => {},
+    target: {
+      click: () => {}
+    }
+  });
+
+  t.ok(called);
+});
+
 test('teardown', t => {
   fixture.destroy();
+  t.pass();
   t.end();
 });

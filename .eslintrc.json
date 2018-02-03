@@ -162,7 +162,6 @@
       "no-native-reassign": "error",
       "no-negated-condition": "off",
       "no-negated-in-lhs": "error",
-      "no-new": "error",
       "no-new-func": "error",
       "no-new-object": "error",
       "no-new-require": "error",
