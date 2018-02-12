@@ -1,7 +1,7 @@
 {
   "name": "drag-on-drop",
   "version": "3.2.2",
-  "description": "Drag and/or drop",
+  "description": "Accessible drag and drop list reorder",
   "main": "dist/dragon-drop.js",
   "scripts": {
     "build": "npm run pre-build && npm run bundle && npm run bundle:min && npm run demo",
