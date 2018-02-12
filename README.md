@@ -1,5 +1,7 @@
 # Dragon Drop
 
+[![CircleCI](https://circleci.com/gh/schne324/dragon-drop.svg?style=svg)](https://circleci.com/gh/schne324/dragon-drop)
+
 Keyboard/assistive technology accessible drag-and-drop reorder list.
 
 <img alt="Dragon Drop" src="/demo/dragondrop_sticker.png" width="400" />
