@@ -12,7 +12,9 @@
     "deploy": "gh-pages -d dist/",
     "dev": "watch-run -p 'lib/**,demo/**,index.js' npm run build",
     "pre-build": "npm run clean && mkdir dist",
-    "test": "tape -r babel-register test/index.js | tap-spec && npm run lint",
+    "test": "npm run test:coverage && npm run lint",
+    "test:coverage": "nyc --reporter=text npm run test:run",
+    "test:run": "tape -r babel-register test/index.js | tap-spec",
     "lint": "eslint ."
   },
   "repository": {

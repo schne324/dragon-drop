@@ -1,7 +1,7 @@
 import 'jsdom-global/register';
 import test from 'tape';
 import simulant, { fire } from 'simulant';
-import DragonDrop from '../';
+import DragonDrop from '../index';
 import defaults from '../lib/defaults';
 import queryAll from '../lib/query-all';
 import Fixture from './helpers/fixture';
@@ -29,7 +29,7 @@ new DragonDrop(nested, {
   nested: true,
   item: '.top-level'
 });
-const ddSublist = new DragonDrop(sublist, {
+const ddSublist = new DragonDrop([sublist], {
   nested: true
 });
 
@@ -162,6 +162,20 @@ test('clicks dragger when SPACE is pressed', t => {
   fire(item, e);
 });
 
+test('clicks a pressed item when TAB is pressed', t => {
+  t.plan(1);
+  const item = ddWithoutDragger.items[1];
+  item.click(); // press it
+  const onItemClick = () => {
+    item.removeEventListener('click', onItemClick);
+    item.click(); // unpress it
+    t.pass();
+  };
+  item.addEventListener('click', onItemClick);
+  const e = simulant('keydown', { which: 9 });
+  fire(item, e);
+});
+
 test('properly moves item up when LEFT or UP is pressed and dragger is pressed', t => {
   t.plan(2);
 
@@ -249,7 +263,7 @@ test('prevents click and keydown events from bubbling up given `nested: true`', 
   t.plan(1);
 
   let called = false;
-  ddSublist.onKeydown({
+  ddSublist[0].onKeydown({
     which: 32,
     stopPropagation: () => called = true,
     preventDefault: () => {},

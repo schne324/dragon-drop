@@ -2142,6 +2142,15 @@ LiveRegion.prototype.announce = function (msg, expire) {
 };
 
 /**
+ * destroy
+ * Removes the live region DOM node inserted on initialization
+ */
+
+LiveRegion.prototype.destroy = function () {
+  this.region.parentNode.removeChild(this.region)
+};
+
+/**
  * Expose LiveRegion
  */
 
