@@ -3,7 +3,10 @@ jobs:
   build:
     docker:
       - image: circleci/node:8.1.4
+
     working_directory: ~/dragon-drop
+
     steps:
       - checkout
+      - run: npm install
       - run: npm test
