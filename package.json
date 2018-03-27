@@ -5,14 +5,15 @@
   "main": "dist/dragon-drop.js",
   "scripts": {
     "build": "npm run pre-build && npm run bundle && npm run bundle:min && npm run demo",
-    "bundle": "browserify index.js -o dist/dragon-drop.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
-    "bundle:min": "browserify -g uglifyify index.js -o dist/dragon-drop.min.js --standalone DragonDrop -t [ babelify --presets [ es2015 ] ]",
+    "bundle": "browserify index.js -o dist/dragon-drop.js --standalone DragonDrop -t [ babelify --presets [ env stage-0 ] ]",
+    "bundle:min": "browserify -g uglifyify index.js -o dist/dragon-drop.min.js --standalone DragonDrop -t [ babelify --presets [ env stage-0 ] ]",
     "clean": "rm -rf dist/",
     "demo": "mkdir dist/demo && cp-dir ./demo ./dist/demo",
     "deploy": "gh-pages -d dist/",
     "dev": "watch-run -p 'lib/**,demo/**,index.js' npm run build",
     "pre-build": "npm run clean && mkdir dist",
-    "test": "tape -r babel-register test/index.js | tap-spec"
+    "test": "tape -r babel-register test/index.js | tap-spec && npm run lint",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,8 @@
   },
   "homepage": "https://github.com/schne324/dragon-drop#readme",
   "devDependencies": {
-    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
     "babelify": "^7.3.0",
     "browserify": "^14.4.0",
@@ -34,6 +36,7 @@
     "gh-pages": "^1.0.0",
     "jsdom": "^11.2.0",
     "jsdom-global": "^3.0.2",
+    "proxyquire": "^2.0.1",
     "simulant": "^0.2.2",
     "tap-spec": "^4.1.1",
     "tape": "^4.8.0",
