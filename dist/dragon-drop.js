@@ -99,6 +99,14 @@ var arrayHandler = function arrayHandler(containers) {
 
     nestedDragula.on('drag', onDrag);
     nestedDragula.on('drop', onDrop);
+
+    instances.forEach(function (inst, i) {
+      if (!nested) {
+        return;
+      }
+
+      inst.dragula = i === 0 ? topLevelDragula : nestedDragula;
+    });
   }
 
   return instances;
@@ -233,7 +241,7 @@ var DragonDrop = function () {
           var thisItem = _this.items.find(function (itm) {
             return itm === handle || itm.contains(handle);
           });
-          // const thisItem = closest(handle, `ul${item}`, true);
+
           _this.announcement(type, thisItem);
           _this.emit(type, _this.container, thisItem);
 
@@ -276,6 +284,7 @@ var DragonDrop = function () {
         if (handle.tagName !== 'BUTTON') {
           handle.setAttribute('role', 'button');
         }
+
         // events
         handle.removeEventListener('keydown', _this2.onKeydown);
         handle.addEventListener('keydown', _this2.onKeydown);
