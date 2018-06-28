@@ -53,6 +53,14 @@ const arrayHandler = (containers, userOptions = {}) => {
 
     nestedDragula.on('drag', onDrag);
     nestedDragula.on('drop', onDrop);
+
+    instances.forEach((inst, i) => {
+      if (!nested) {
+        return;
+      }
+
+      inst.dragula = i === 0 ? topLevelDragula : nestedDragula;
+    });
   }
 
   return instances;
@@ -167,7 +175,7 @@ export default class DragonDrop {
         const thisItem = this.items.find(itm => {
           return itm === handle || itm.contains(handle);
         });
-        // const thisItem = closest(handle, `ul${item}`, true);
+
         this.announcement(type, thisItem);
         this.emit(type, this.container, thisItem);
 
@@ -205,6 +213,7 @@ export default class DragonDrop {
       if (handle.tagName !== 'BUTTON') {
         handle.setAttribute('role', 'button');
       }
+
       // events
       handle.removeEventListener('keydown', this.onKeydown);
       handle.addEventListener('keydown', this.onKeydown);
