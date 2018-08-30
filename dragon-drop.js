@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.DragonDrop = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.DragonDrop = f()}})(function(){var define,module,exports;return (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 require('element-qsa-scope');
 
@@ -16,10 +18,6 @@ var _dragula2 = _interopRequireDefault(_dragula);
 var _liveRegion = require('live-region');
 
 var _liveRegion2 = _interopRequireDefault(_liveRegion);
-
-var _mergeOptions = require('merge-options');
-
-var _mergeOptions2 = _interopRequireDefault(_mergeOptions);
 
 var _debug = require('debug');
 
@@ -48,7 +46,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var debug = (0, _debug2.default)('drag-on-drop:index');
 var arrayHandler = function arrayHandler(containers) {
   var userOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var nested = userOptions.nested;
+  var nested = userOptions.nested,
+      _userOptions$dragulaO = userOptions.dragulaOptions,
+      dragulaOptions = _userOptions$dragulaO === undefined ? {} : _userOptions$dragulaO;
 
   var instances = [];
 
@@ -78,27 +78,31 @@ var arrayHandler = function arrayHandler(containers) {
     var lists = Array.from(containers);
     lists.shift(); // remove the top-most conatainer
 
-    var topLevelDragula = (0, _dragula2.default)([topMost], {
+    var topLevelDragula = (0, _dragula2.default)([topMost], _extends({}, dragulaOptions, {
       moves: function moves(_, __, handle) {
         return !lists.find(function (l) {
           return l.contains(handle);
         });
       }
-    });
+    }));
 
     topLevelDragula.on('drag', onDrag);
     topLevelDragula.on('drop', onDrop);
 
-    var nestedDragula = (0, _dragula2.default)(lists, {
+    var nestedDragula = (0, _dragula2.default)(lists, _extends({}, dragulaOptions, {
       accepts: function accepts(el, target, source) {
         // TODO: when `options.locked` is implemented...
         // if (!options.locked) { return true }
         return target === source;
       }
-    });
+    }));
 
     nestedDragula.on('drag', onDrag);
     nestedDragula.on('drop', onDrop);
+
+    instances.forEach(function (inst, i) {
+      inst.dragula = i === 0 ? topLevelDragula : nestedDragula;
+    });
   }
 
   return instances;
@@ -164,7 +168,7 @@ var DragonDrop = function () {
         }
       };
       // init mouse drag via dragula
-      this.dragula = (0, _dragula2.default)([container], dragulaOpts);
+      this.dragula = (0, _dragula2.default)([container], _extends({}, userOptions.dragulaOptions, dragulaOpts));
     }
 
     // init live region for custom announcements
@@ -194,7 +198,9 @@ var DragonDrop = function () {
     key: 'initOptions',
     value: function initOptions(userOptions) {
       userOptions.announcement = userOptions.announcement || {};
-      this.options = (0, _mergeOptions2.default)({}, _defaults2.default, userOptions);
+      this.options = _extends({}, _defaults2.default, userOptions, {
+        announcement: _extends({}, _defaults2.default.announcement, userOptions.announcement)
+      });
 
       return this;
     }
@@ -233,7 +239,7 @@ var DragonDrop = function () {
           var thisItem = _this.items.find(function (itm) {
             return itm === handle || itm.contains(handle);
           });
-          // const thisItem = closest(handle, `ul${item}`, true);
+
           _this.announcement(type, thisItem);
           _this.emit(type, _this.container, thisItem);
 
@@ -276,6 +282,7 @@ var DragonDrop = function () {
         if (handle.tagName !== 'BUTTON') {
           handle.setAttribute('role', 'button');
         }
+
         // events
         handle.removeEventListener('keydown', _this2.onKeydown);
         handle.addEventListener('keydown', _this2.onKeydown);
@@ -427,7 +434,7 @@ var DragonDrop = function () {
 exports.default = DragonDrop;
 module.exports = DragonDrop;
 
-},{"./lib/defaults":2,"./lib/query-all":3,"component-emitter":5,"debug":11,"dom-matches":13,"dragula":15,"element-qsa-scope":16,"live-region":18,"merge-options":19}],2:[function(require,module,exports){
+},{"./lib/defaults":2,"./lib/query-all":3,"component-emitter":5,"debug":11,"dom-matches":13,"dragula":15,"element-qsa-scope":16,"live-region":17}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -650,7 +657,7 @@ module.exports = function debounce (fn, args, ctx) {
   });
 };
 
-},{"ticky":22}],7:[function(require,module,exports){
+},{"ticky":20}],7:[function(require,module,exports){
 'use strict';
 
 var atoa = require('atoa');
@@ -1079,7 +1086,7 @@ function localstorage() {
 }
 
 }).call(this,require('_process'))
-},{"./debug":12,"_process":21}],12:[function(require,module,exports){
+},{"./debug":12,"_process":19}],12:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1306,7 +1313,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":20}],13:[function(require,module,exports){
+},{"ms":18}],13:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2067,15 +2074,6 @@ try {
 
 },{}],17:[function(require,module,exports){
 'use strict';
-var toString = Object.prototype.toString;
-
-module.exports = function (x) {
-	var prototype;
-	return toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));
-};
-
-},{}],18:[function(require,module,exports){
-'use strict';
 
 /**
  * Creates the region
@@ -2142,6 +2140,15 @@ LiveRegion.prototype.announce = function (msg, expire) {
 };
 
 /**
+ * destroy
+ * Removes the live region DOM node inserted on initialization
+ */
+
+LiveRegion.prototype.destroy = function () {
+  this.region.parentNode.removeChild(this.region)
+};
+
+/**
  * Expose LiveRegion
  */
 
@@ -2149,164 +2156,7 @@ if (typeof module !== 'undefined') {
   module.exports = LiveRegion;
 }
 
-},{}],19:[function(require,module,exports){
-'use strict';
-const isOptionObject = require('is-plain-obj');
-
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-const propIsEnumerable = Object.propertyIsEnumerable;
-const globalThis = this;
-const defaultMergeOpts = {
-	concatArrays: false
-};
-
-const getEnumerableOwnPropertyKeys = value => {
-	const keys = [];
-
-	for (const key in value) {
-		if (hasOwnProperty.call(value, key)) {
-			keys.push(key);
-		}
-	}
-
-	/* istanbul ignore else  */
-	if (Object.getOwnPropertySymbols) {
-		const symbols = Object.getOwnPropertySymbols(value);
-
-		for (let i = 0; i < symbols.length; i++) {
-			if (propIsEnumerable.call(value, symbols[i])) {
-				keys.push(symbols[i]);
-			}
-		}
-	}
-
-	return keys;
-};
-
-function clone(value) {
-	if (Array.isArray(value)) {
-		return cloneArray(value);
-	}
-
-	if (isOptionObject(value)) {
-		return cloneOptionObject(value);
-	}
-
-	return value;
-}
-
-function cloneArray(array) {
-	const result = array.slice(0, 0);
-
-	getEnumerableOwnPropertyKeys(array).forEach(key => {
-		result[key] = clone(array[key]);
-	});
-
-	return result;
-}
-
-function cloneOptionObject(obj) {
-	const result = Object.getPrototypeOf(obj) === null ? Object.create(null) : {};
-
-	getEnumerableOwnPropertyKeys(obj).forEach(key => {
-		result[key] = clone(obj[key]);
-	});
-
-	return result;
-}
-
-/**
- * @param merged {already cloned}
- * @return {cloned Object}
- */
-const mergeKeys = (merged, source, keys, mergeOpts) => {
-	keys.forEach(key => {
-		if (key in merged) {
-			merged[key] = merge(merged[key], source[key], mergeOpts);
-		} else {
-			merged[key] = clone(source[key]);
-		}
-	});
-
-	return merged;
-};
-
-/**
- * @param merged {already cloned}
- * @return {cloned Object}
- *
- * see [Array.prototype.concat ( ...arguments )](http://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.concat)
- */
-const concatArrays = (merged, source, mergeOpts) => {
-	let result = merged.slice(0, 0);
-	let resultIndex = 0;
-
-	[merged, source].forEach(array => {
-		const indices = [];
-
-		// `result.concat(array)` with cloning
-		for (let k = 0; k < array.length; k++) {
-			if (!hasOwnProperty.call(array, k)) {
-				continue;
-			}
-
-			indices.push(String(k));
-
-			if (array === merged) {
-				// Already cloned
-				result[resultIndex++] = array[k];
-			} else {
-				result[resultIndex++] = clone(array[k]);
-			}
-		}
-
-		// Merge non-index keys
-		result = mergeKeys(result, array, getEnumerableOwnPropertyKeys(array).filter(key => {
-			return indices.indexOf(key) === -1;
-		}), mergeOpts);
-	});
-
-	return result;
-};
-
-/**
- * @param merged {already cloned}
- * @return {cloned Object}
- */
-function merge(merged, source, mergeOpts) {
-	if (mergeOpts.concatArrays && Array.isArray(merged) && Array.isArray(source)) {
-		return concatArrays(merged, source, mergeOpts);
-	}
-
-	if (!isOptionObject(source) || !isOptionObject(merged)) {
-		return clone(source);
-	}
-
-	return mergeKeys(merged, source, getEnumerableOwnPropertyKeys(source), mergeOpts);
-}
-
-module.exports = function () {
-	const mergeOpts = merge(clone(defaultMergeOpts), (this !== globalThis && this) || {}, defaultMergeOpts);
-	let merged = {};
-
-	for (let i = 0; i < arguments.length; i++) {
-		const option = arguments[i];
-
-		if (option === undefined) {
-			continue;
-		}
-
-		if (!isOptionObject(option)) {
-			throw new TypeError('`' + option + '` is not an Option Object');
-		}
-
-		merged = merge(merged, option, mergeOpts);
-	}
-
-	return merged;
-};
-
-},{"is-plain-obj":17}],20:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -2460,7 +2310,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],21:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -2646,7 +2496,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],22:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var si = typeof setImmediate === 'function', tick;
 if (si) {
   tick = function (fn) { setImmediate(fn); };
