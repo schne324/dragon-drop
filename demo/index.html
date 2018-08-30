@@ -244,8 +244,8 @@
         }
       });
 
-      demo3Dragons.forEach(instance => {
-        instance.on('announcement', onAnnouncement)
+      demo3Dragons.forEach(function (instance) {
+        instance.on('announcement', onAnnouncement);
       });
 
       var checkbox = document.getElementById('display-region');
