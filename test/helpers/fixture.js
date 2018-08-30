@@ -4,6 +4,7 @@ export default class Fixture {
     this.withoutDragger = document.createElement('div');
     this.withDragger = document.createElement('div');
     this.nested = document.createElement('div');
+    this.dragula = document.createElement('div');
 
     this.withoutDragger.innerHTML = `
       <ul id="without-dragger">
@@ -35,10 +36,12 @@ export default class Fixture {
         </li>
       </ul>
     `;
+    this.dragula.innerHTML = '<ul id="for-dragula"><li>Hi</li><li>Bye</li></ul>';
 
     document.body.appendChild(this.withoutDragger);
     document.body.appendChild(this.withDragger);
     document.body.appendChild(this.nested);
+    document.body.appendChild(this.dragula);
   }
 
   destroy() {

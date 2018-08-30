@@ -148,6 +148,14 @@ sublist1.on('grabbed', () => console.log('sublist 1 item grabbed'));
 sublist2.on('grabbed', () => console.log('sublist 1 item grabbed'));
 ```
 
+##### `dragulaOptions` _Object_
+
+An options object passed through to dragula.
+
+__NOTE__: `dragulaOptions.moves` will be ignored given a DragonDrop instance with `nested: false` and a truthy `handle`
+
+__NOTE__: `dragulaOptions.moves` AND `dragulaOptions.accepts` will be ignored given a DragonDrop instance with `nested: true`
+
 ##### `announcement` _Object_
 
 The live region announcement configuration object containing the following properties:
@@ -200,6 +208,10 @@ An array of each of the sortable item element references.
 ### `dragonDrop.handles` _Array_
 
 An array of each of the handle item element references. If instance doesn't have handles, this will be identical to `dragonDrop.items`.
+
+### `dragonDrop.dragula`
+
+A direct handle on the `dragula` instance created by `dragonDrop`
 
 ### Example with options
 
