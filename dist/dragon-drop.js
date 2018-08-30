@@ -5,9 +5,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 require('element-qsa-scope');
 
@@ -46,7 +46,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var debug = (0, _debug2.default)('drag-on-drop:index');
 var arrayHandler = function arrayHandler(containers) {
   var userOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var nested = userOptions.nested;
+  var nested = userOptions.nested,
+      _userOptions$dragulaO = userOptions.dragulaOptions,
+      dragulaOptions = _userOptions$dragulaO === undefined ? {} : _userOptions$dragulaO;
 
   var instances = [];
 
@@ -76,33 +78,29 @@ var arrayHandler = function arrayHandler(containers) {
     var lists = Array.from(containers);
     lists.shift(); // remove the top-most conatainer
 
-    var topLevelDragula = (0, _dragula2.default)([topMost], {
+    var topLevelDragula = (0, _dragula2.default)([topMost], _extends({}, dragulaOptions, {
       moves: function moves(_, __, handle) {
         return !lists.find(function (l) {
           return l.contains(handle);
         });
       }
-    });
+    }));
 
     topLevelDragula.on('drag', onDrag);
     topLevelDragula.on('drop', onDrop);
 
-    var nestedDragula = (0, _dragula2.default)(lists, {
+    var nestedDragula = (0, _dragula2.default)(lists, _extends({}, dragulaOptions, {
       accepts: function accepts(el, target, source) {
         // TODO: when `options.locked` is implemented...
         // if (!options.locked) { return true }
         return target === source;
       }
-    });
+    }));
 
     nestedDragula.on('drag', onDrag);
     nestedDragula.on('drop', onDrop);
 
     instances.forEach(function (inst, i) {
-      if (!nested) {
-        return;
-      }
-
       inst.dragula = i === 0 ? topLevelDragula : nestedDragula;
     });
   }
@@ -170,7 +168,7 @@ var DragonDrop = function () {
         }
       };
       // init mouse drag via dragula
-      this.dragula = (0, _dragula2.default)([container], dragulaOpts);
+      this.dragula = (0, _dragula2.default)([container], _extends({}, userOptions.dragulaOptions, dragulaOpts));
     }
 
     // init live region for custom announcements

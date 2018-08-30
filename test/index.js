@@ -1,11 +1,19 @@
 import 'jsdom-global/register';
 import test from 'tape';
 import simulant, { fire } from 'simulant';
-import DragonDrop from '../index';
+import proxyquire from 'proxyquire';
+import { spy, stub } from 'sinon';
 import defaults from '../lib/defaults';
 import queryAll from '../lib/query-all';
 import Fixture from './helpers/fixture';
 
+proxyquire.noCallThru();
+
+const on = spy();
+const dragula = stub();
+dragula.returns({ on });
+
+const DragonDrop = proxyquire('../index', { dragula });
 const fixture = new Fixture();
 
 const wd = document.getElementById('with-dragger');
@@ -22,12 +30,20 @@ const ddWithDragger = new DragonDrop(wd, {
 });
 const ddWithoutDragger = new DragonDrop(wod, {
   item: '.without-dragger-item',
-  handle: false
+  handle: false,
+  dragulaOptions: {
+    boognish: true
+  }
 });
 new DragonDrop(nested, {
   handle: false,
   nested: true,
-  item: '.top-level'
+  item: '.top-level',
+  dragulaOptions: {
+    freds: 7,
+    accepts: 'hello',
+    moves: 'world'
+  }
 });
 const ddSublist = new DragonDrop([sublist], {
   nested: true
@@ -51,6 +67,28 @@ test('properly merges user options with defaults', t => {
     options.announcement.reorder(testEl, [testEl]),
     announcement.reorder(testEl, [testEl])
   );
+});
+
+test('properly blends in user\'s `dragulaOptions` without clobbering reserved options', t => {
+  t.equal(dragula.callCount, 4);
+  // the `ddWithDragger` call which passes 0 dragulaOptions
+  const ddWithDraggerArgs = dragula.getCall(0).args;
+  t.equal(Object.keys(ddWithDraggerArgs[1]).length, 1);
+  t.equal(typeof ddWithDraggerArgs[1].moves, 'function');
+  // the `ddWithoutDragger` call which passes arbitrary `boognish: true` as only dragulaOptions
+  const ddWithoutDraggerArgs = dragula.getCall(1).args;
+  t.deepEqual(ddWithoutDraggerArgs[1], {
+    boognish: true
+  });
+
+  // the 2 calls as a result of the `nested: true` call
+  const nestedCall1Args = dragula.getCall(2).args;
+  const nestedCall2Args = dragula.getCall(3).args;
+  t.equal(Object.keys(nestedCall1Args[1]).length, 1);
+  t.equal(Object.keys(nestedCall2Args[1]).length, 1);
+  t.equal(typeof nestedCall1Args[1].moves, 'function');
+  t.equal(typeof nestedCall2Args[1].accepts, 'function');
+  t.end();
 });
 
 test('properly sets element ref properties', t => {
@@ -215,6 +253,12 @@ test('properly moves item down when DOWN or RIGHT is pressed and dragger is pres
   // fire the right keydown
   fire(item, secondKeydown);
 
+  // fire it a few more times to test capping out
+  fire(item, secondKeydown);
+  fire(item, secondKeydown);
+  fire(item, secondKeydown);
+  fire(item, secondKeydown);
+
   const itemsAfterRight = queryAll('button', ddWithDragger.container);
   item.click(); // unpress it
   t.is(itemsAfterRight.indexOf(item), 2);
@@ -273,6 +317,30 @@ test('prevents click and keydown events from bubbling up given `nested: true`', 
   });
 
   t.ok(called);
+});
+
+test('handles dragula\'s "drag" and "drop" events', t => {
+  const handlers = {};
+  const dragList = document.getElementById('for-dragula');
+  const D = proxyquire('../index', {
+    dragula: () => ({
+      on: (type, cb) => handlers[type] = cb
+    })
+  });
+
+  const d = new D(dragList, {
+    item: 'li'
+  });
+  spy(d, 'announcement');
+  handlers.drag(dragList.firstChild);
+  t.equal(d.announcement.callCount, 1);
+  t.equal(d.announcement.getCall(0).args[0], 'grabbed');
+
+  handlers.drop(dragList.firstChild);
+  t.equal(d.announcement.callCount, 2);
+  t.equal(d.announcement.getCall(1).args[0], 'dropped');
+
+  t.end();
 });
 
 test('teardown', t => {

@@ -4,13 +4,12 @@ import LiveRegion from 'live-region';
 import createDebug from 'debug';
 import Emitter from 'component-emitter';
 import matches from 'dom-matches';
-
 import defaults from './lib/defaults';
 import queryAll from './lib/query-all';
 
 const debug = createDebug('drag-on-drop:index');
 const arrayHandler = (containers, userOptions = {}) => {
-  const { nested } = userOptions;
+  const { nested, dragulaOptions = {} } = userOptions;
   const instances = [];
 
   containers.forEach(container => {
@@ -36,6 +35,7 @@ const arrayHandler = (containers, userOptions = {}) => {
     lists.shift(); // remove the top-most conatainer
 
     const topLevelDragula = dragula([topMost], {
+      ...dragulaOptions,
       moves: (_, __, handle) => !lists.find(l => l.contains(handle))
     });
 
@@ -43,6 +43,7 @@ const arrayHandler = (containers, userOptions = {}) => {
     topLevelDragula.on('drop', onDrop);
 
     const nestedDragula = dragula(lists, {
+      ...dragulaOptions,
       accepts: (el, target, source) => {
         // TODO: when `options.locked` is implemented...
         // if (!options.locked) { return true }
@@ -54,10 +55,6 @@ const arrayHandler = (containers, userOptions = {}) => {
     nestedDragula.on('drop', onDrop);
 
     instances.forEach((inst, i) => {
-      if (!nested) {
-        return;
-      }
-
       inst.dragula = i === 0 ? topLevelDragula : nestedDragula;
     });
   }
@@ -116,7 +113,10 @@ export default class DragonDrop {
         moves: (_, __, h) => matches(h, handle)
       };
       // init mouse drag via dragula
-      this.dragula = dragula([container], dragulaOpts);
+      this.dragula = dragula([container], {
+        ...userOptions.dragulaOptions,
+        ...dragulaOpts
+      });
     }
 
     // init live region for custom announcements
