@@ -1,7 +1,6 @@
 import 'element-qsa-scope';
 import dragula from 'dragula';
 import LiveRegion from 'live-region';
-import mergeOptions from 'merge-options';
 import createDebug from 'debug';
 import Emitter from 'component-emitter';
 import matches from 'dom-matches';
@@ -146,7 +145,14 @@ export default class DragonDrop {
    */
   initOptions(userOptions) {
     userOptions.announcement = userOptions.announcement || {};
-    this.options = mergeOptions({}, defaults, userOptions);
+    this.options = {
+      ...defaults,
+      ...userOptions,
+      announcement: {
+        ...defaults.announcement,
+        ...userOptions.announcement
+      }
+    };
 
     return this;
   }

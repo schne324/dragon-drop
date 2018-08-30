@@ -53,7 +53,6 @@
     "dragula": "^3.7.2",
     "element-qsa-scope": "^1.0.1",
     "live-region": "^1.0.2",
-    "merge-options": "^1.0.0",
     "optimal-select": "^4.0.1"
   }
 }
