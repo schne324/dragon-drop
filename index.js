@@ -1,3 +1,4 @@
+import '@babel/polyfill';
 import 'element-qsa-scope';
 import dragula from 'dragula';
 import LiveRegion from 'live-region';

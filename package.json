@@ -49,6 +49,7 @@
     "watch-run": "^1.2.5"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.0.0",
     "component-emitter": "^1.2.1",
     "dom-matches": "^2.0.0",
     "dragula": "^3.7.2",
