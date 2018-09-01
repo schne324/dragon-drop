@@ -9,7 +9,7 @@
     "bundle:min": "browserify -g uglifyify index.js -o dist/dragon-drop.min.js --standalone DragonDrop -t [ babelify --presets [ env stage-0 ] ]",
     "clean": "rm -rf dist/",
     "demo": "mkdir dist/demo && cp-dir ./demo ./dist/demo",
-    "deploy": "gh-pages -d dist/",
+    "deploy": "gh-pages -m 'auto commit [ci skip]' -d dist/",
     "dev": "watch-run -p 'lib/**,demo/**,index.js' npm run build",
     "pre-build": "npm run clean && mkdir dist",
     "test": "npm run test:coverage && npm run lint",
