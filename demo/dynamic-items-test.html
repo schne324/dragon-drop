@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Dragon Drop | Dynamic List Items</title>
+  </head>
+  <body>
+    <ul id="dragon">
+      <li>Foo</li>
+      <li>Bar</li>
+      <li>Baz</li>
+    </ul>
+    <button id="add" type='button'>Add Item</button>
+    <script src="../dragon-drop.js"></script>
+    <script>
+      var dragon = document.getElementById('dragon');
+      var dragonDrop = new DragonDrop(dragon, { handle: false });
+      var add = document.getElementById('add');
+      var added = 1;
+
+      add.addEventListener('click', function (e) {
+        var newItem = document.createElement('li');
+        newItem.innerHTML = 'Dynamically added item #' + added;
+        dragon.appendChild(newItem);
+        dragonDrop.initElements(dragon);
+        added++;
+      });
+    </script>
+  </body>
+</html>
