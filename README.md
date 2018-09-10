@@ -61,7 +61,7 @@ class App extends Component {
     const { dragonDrop } = this.state;
     // this public method allows dragon drop to
     // reassess the updated items and handles
-    dragonDrop.initElements();
+    dragonDrop.initElements(this.dragon);
   }
 
   render() {

@@ -104,6 +104,7 @@ export default class DragonDrop {
     }
     // make the dragon an emitter
     Emitter(this);
+    this.handledHandles = [];
     this.initOptions(userOptions);
 
     const { handle, nested } = this.options;
@@ -132,8 +133,7 @@ export default class DragonDrop {
     // initialize elements / events
     this
       .initElements(container)
-      .mouseEvents()
-      .initClick();
+      .mouseEvents();
 
     debug('dragon initialized: ', this);
 
@@ -159,16 +159,20 @@ export default class DragonDrop {
   }
 
   initClick() {
-    const { activeClass, inactiveClass, nested} = this.options;
+    const { activeClass, inactiveClass, nested } = this.options;
 
     this.handles.forEach(handle => {
+      if (this.handledHandles.includes(handle)) {
+        return;
+      }
+
       handle.addEventListener('click', e => {
         if (nested) { e.stopPropagation(); }
         const wasPressed = handle.getAttribute('data-drag-on') === 'true';
         const type = wasPressed ? 'dropped' : 'grabbed';
 
         // clean up
-        this.handles // TODO: This can probably be tied into the below items iteration
+        this.handles
           .filter(h => h.getAttribute('aria-pressed') === 'true')
           .forEach(h => {
             h.setAttribute('aria-pressed', 'false');
@@ -200,6 +204,8 @@ export default class DragonDrop {
           this.cachedItems = queryAll(this.options.item, this.container);
         }
       });
+
+      this.handledHandles.push(handle);
     });
 
     return this;
@@ -211,7 +217,8 @@ export default class DragonDrop {
    */
   initElements(container) {
     this.container = container;
-    this.setItems();
+    this.setItems().initClick();
+
 
     // set all attrs/props/events on handle elements
     this.handles.forEach(handle => {

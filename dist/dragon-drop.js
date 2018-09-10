@@ -155,6 +155,7 @@ var DragonDrop = function () {
     }
     // make the dragon an emitter
     (0, _componentEmitter2.default)(this);
+    this.handledHandles = [];
     this.initOptions(userOptions);
 
     var _options = this.options,
@@ -183,7 +184,7 @@ var DragonDrop = function () {
     this.onKeydown = this.onKeydown.bind(this);
 
     // initialize elements / events
-    this.initElements(container).mouseEvents().initClick();
+    this.initElements(container).mouseEvents();
 
     debug('dragon initialized: ', this);
 
@@ -218,6 +219,10 @@ var DragonDrop = function () {
 
 
       this.handles.forEach(function (handle) {
+        if (_this.handledHandles.includes(handle)) {
+          return;
+        }
+
         handle.addEventListener('click', function (e) {
           if (nested) {
             e.stopPropagation();
@@ -226,8 +231,7 @@ var DragonDrop = function () {
           var type = wasPressed ? 'dropped' : 'grabbed';
 
           // clean up
-          _this.handles // TODO: This can probably be tied into the below items iteration
-          .filter(function (h) {
+          _this.handles.filter(function (h) {
             return h.getAttribute('aria-pressed') === 'true';
           }).forEach(function (h) {
             h.setAttribute('aria-pressed', 'false');
@@ -259,6 +263,8 @@ var DragonDrop = function () {
             _this.cachedItems = (0, _queryAll2.default)(_this.options.item, _this.container);
           }
         });
+
+        _this.handledHandles.push(handle);
       });
 
       return this;
@@ -275,7 +281,7 @@ var DragonDrop = function () {
       var _this2 = this;
 
       this.container = container;
-      this.setItems();
+      this.setItems().initClick();
 
       // set all attrs/props/events on handle elements
       this.handles.forEach(function (handle) {
