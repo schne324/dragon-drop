@@ -264,6 +264,17 @@ dragonDrop
 dragonDrop.dragula.on('drop', ...);
 ```
 
+## Methods
+
+### `dragonDrop.initElements(container)`
+
+Reinitialises the list, so that newly added items can be dragged. You can do this automatically with a `MutationObserver`:
+
+```js
+const observer = new MutationObserver(() => dragonDrop.initElements(container));
+observer.observe(container, {childList: true});
+```
+
 ## Debugging
 
 Set the following localStorage option to debug dragonDrop
