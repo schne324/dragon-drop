@@ -456,14 +456,14 @@ var defaults = {
   nested: false, // if true, stops propagation on keydown / click events
   announcement: {
     grabbed: function grabbed(el) {
-      return 'Item ' + el.innerText + ' grabbed';
+      return 'Item ' + el.innerHTML + ' grabbed';
     },
     dropped: function dropped(el) {
-      return 'Item ' + el.innerText + ' dropped';
+      return 'Item ' + el.innerHTML + ' dropped';
     },
     reorder: function reorder(el, items) {
       var pos = items.indexOf(el) + 1;
-      var text = el.innerText;
+      var text = el.innerHTML;
       return 'The list has been reordered, ' + text + ' is now item ' + pos + ' of ' + items.length;
     },
     cancel: 'Reordering cancelled'
