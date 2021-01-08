@@ -119,6 +119,15 @@ export default class DragonDrop {
         ...userOptions.dragulaOptions,
         ...dragulaOpts
       });
+
+      this.dragula.on('drag', (el) => {
+        this.emit('grabbed', container, el);
+      });
+
+      this.dragula.on('drop', (el) => {
+        this.emit('dropped', container, el);
+      });
+
     }
 
     // init live region for custom announcements
