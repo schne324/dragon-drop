@@ -146,6 +146,8 @@ var DragonDrop = function () {
    *                                          (via ESC). No arguments passed in.
    */
   function DragonDrop(container) {
+    var _this = this;
+
     var userOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     _classCallCheck(this, DragonDrop);
@@ -172,6 +174,14 @@ var DragonDrop = function () {
       };
       // init mouse drag via dragula
       this.dragula = (0, _dragula2.default)([container], _extends({}, userOptions.dragulaOptions, dragulaOpts));
+
+      this.dragula.on('drag', function (el) {
+        _this.emit('grabbed', container, el);
+      });
+
+      this.dragula.on('drop', function (el) {
+        _this.emit('dropped', container, el);
+      });
     }
 
     // init live region for custom announcements
@@ -210,7 +220,7 @@ var DragonDrop = function () {
   }, {
     key: 'initClick',
     value: function initClick() {
-      var _this = this;
+      var _this2 = this;
 
       var _options2 = this.options,
           activeClass = _options2.activeClass,
@@ -219,7 +229,7 @@ var DragonDrop = function () {
 
 
       this.handles.forEach(function (handle) {
-        if (_this.handledHandles.includes(handle)) {
+        if (_this2.handledHandles.includes(handle)) {
           return;
         }
 
@@ -231,7 +241,7 @@ var DragonDrop = function () {
           var type = wasPressed ? 'dropped' : 'grabbed';
 
           // clean up
-          _this.handles.filter(function (h) {
+          _this2.handles.filter(function (h) {
             return h.getAttribute('aria-pressed') === 'true';
           }).forEach(function (h) {
             h.setAttribute('aria-pressed', 'false');
@@ -242,15 +252,15 @@ var DragonDrop = function () {
           handle.setAttribute('aria-pressed', '' + !wasPressed);
           handle.setAttribute('data-drag-on', '' + !wasPressed);
 
-          var thisItem = _this.items.find(function (itm) {
+          var thisItem = _this2.items.find(function (itm) {
             return itm === handle || itm.contains(handle);
           });
 
-          _this.announcement(type, thisItem);
-          _this.emit(type, _this.container, thisItem);
+          _this2.announcement(type, thisItem);
+          _this2.emit(type, _this2.container, thisItem);
 
           // configure classes (active and inactive)
-          _this.items.forEach(function (it) {
+          _this2.items.forEach(function (it) {
             var method = !wasPressed ? 'add' : 'remove';
             var isTarget = it === handle || it.contains(handle);
 
@@ -260,11 +270,11 @@ var DragonDrop = function () {
 
           if (!wasPressed) {
             // cache the initial order to allow for escape cancellation
-            _this.cachedItems = (0, _queryAll2.default)(_this.options.item, _this.container);
+            _this2.cachedItems = (0, _queryAll2.default)(_this2.options.item, _this2.container);
           }
         });
 
-        _this.handledHandles.push(handle);
+        _this2.handledHandles.push(handle);
       });
 
       return this;
@@ -278,7 +288,7 @@ var DragonDrop = function () {
   }, {
     key: 'initElements',
     value: function initElements(container) {
-      var _this2 = this;
+      var _this3 = this;
 
       this.container = container;
       this.setItems().initClick();
@@ -292,8 +302,8 @@ var DragonDrop = function () {
         }
 
         // events
-        handle.removeEventListener('keydown', _this2.onKeydown);
-        handle.addEventListener('keydown', _this2.onKeydown);
+        handle.removeEventListener('keydown', _this3.onKeydown);
+        handle.addEventListener('keydown', _this3.onKeydown);
       });
 
       return this;
@@ -396,18 +406,18 @@ var DragonDrop = function () {
   }, {
     key: 'mouseEvents',
     value: function mouseEvents() {
-      var _this3 = this;
+      var _this4 = this;
 
       var nested = this.options.nested;
 
 
       if (!nested) {
         this.dragula.on('drag', function (el) {
-          _this3.announcement('grabbed', el);
+          _this4.announcement('grabbed', el);
         });
 
         this.dragula.on('drop', function (el) {
-          _this3.announcement('dropped', el).setItems();
+          _this4.announcement('dropped', el).setItems();
         });
       }
 
@@ -416,13 +426,13 @@ var DragonDrop = function () {
   }, {
     key: 'cancel',
     value: function cancel() {
-      var _this4 = this;
+      var _this5 = this;
 
       // cache active element so it can be focused after reorder
       var focused = document.activeElement;
       // restore the order of the list
       this.cachedItems.forEach(function (item) {
-        return _this4.container.appendChild(item);
+        return _this5.container.appendChild(item);
       });
       this.items = this.cachedItems;
       // ensure the handle stays focused
