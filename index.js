@@ -13,19 +13,19 @@ const arrayHandler = (containers, userOptions = {}) => {
   const { nested, dragulaOptions = {} } = userOptions;
   const instances = [];
 
-  containers.forEach(container => {
+  containers.forEach((container) => {
     instances.push(new DragonDrop(container, userOptions, nested));
   });
 
   if (nested) {
     const onDrag = (el, source) => {
-      const instance = instances.find(inst => inst.container === source);
+      const instance = instances.find((inst) => inst.container === source);
       if (instance) {
         instance.announcement('grabbed', el);
       }
     };
     const onDrop = (el, source) => {
-      const instance = instances.find(inst => inst.container === source);
+      const instance = instances.find((inst) => inst.container === source);
       if (instance) {
         instance.announcement('dropped', el).setItems();
       }
@@ -37,7 +37,7 @@ const arrayHandler = (containers, userOptions = {}) => {
 
     const topLevelDragula = dragula([topMost], {
       ...dragulaOptions,
-      moves: (_, __, handle) => !lists.find(l => l.contains(handle))
+      moves: (_, __, handle) => !lists.find((l) => l.contains(handle)),
     });
 
     topLevelDragula.on('drag', onDrag);
@@ -49,7 +49,7 @@ const arrayHandler = (containers, userOptions = {}) => {
         // TODO: when `options.locked` is implemented...
         // if (!options.locked) { return true }
         return target === source;
-      }
+      },
     });
 
     nestedDragula.on('drag', onDrag);
@@ -97,6 +97,9 @@ export default class DragonDrop {
    *                                           the live region.
    * @option {Function} announcement.cancel - The function called when the reorder is cancelled
    *                                          (via ESC). No arguments passed in.
+   * @option {string} live.ariaLive - Optional ariaLive attribute to be passed to the live region. Valid values are "off", "polite", or "assertive". Default is "assertive".
+   * @option {string} live.ariaRelevant - Optional ariaRelevant attribute to be passed to the live region. Valid values are "additions", "removals", "text", and "all". Default is "additions".
+   * @option {boolean} live.ariaAtomic - Optional ariaAtomic attribute to be passed to the live region. Default is "true".
    */
   constructor(container, userOptions = {}) {
     if (Array.isArray(container)) {
@@ -112,12 +115,12 @@ export default class DragonDrop {
     if (!nested) {
       // if handle is truthy, pass this info along with
       const dragulaOpts = handle && {
-        moves: (_, __, h) => matches(h, handle)
+        moves: (_, __, h) => matches(h, handle),
       };
       // init mouse drag via dragula
       this.dragula = dragula([container], {
         ...userOptions.dragulaOptions,
-        ...dragulaOpts
+        ...dragulaOpts,
       });
 
       this.dragula.on('drag', (el) => {
@@ -127,22 +130,24 @@ export default class DragonDrop {
       this.dragula.on('drop', (el) => {
         this.emit('dropped', container, el);
       });
-
     }
+
+    const liveOpts = {
+      ariaLive: 'assertive',
+      ariaRelevant: 'additions',
+      ariaAtomic: 'true',
+    };
 
     // init live region for custom announcements
     this.liveRegion = new LiveRegion({
-      ariaLive: 'assertive',
-      ariaRelevant: 'additions',
-      ariaAtomic: 'true'
+      ...liveOpts,
+      ...userOptions.live,
     });
 
     this.onKeydown = this.onKeydown.bind(this);
 
     // initialize elements / events
-    this
-      .initElements(container)
-      .mouseEvents();
+    this.initElements(container).mouseEvents();
 
     debug('dragon initialized: ', this);
 
@@ -160,8 +165,8 @@ export default class DragonDrop {
       ...userOptions,
       announcement: {
         ...defaults.announcement,
-        ...userOptions.announcement
-      }
+        ...userOptions.announcement,
+      },
     };
 
     return this;
@@ -170,20 +175,22 @@ export default class DragonDrop {
   initClick() {
     const { activeClass, inactiveClass, nested } = this.options;
 
-    this.handles.forEach(handle => {
+    this.handles.forEach((handle) => {
       if (this.handledHandles.includes(handle)) {
         return;
       }
 
-      handle.addEventListener('click', e => {
-        if (nested) { e.stopPropagation(); }
+      handle.addEventListener('click', (e) => {
+        if (nested) {
+          e.stopPropagation();
+        }
         const wasPressed = handle.getAttribute('data-drag-on') === 'true';
         const type = wasPressed ? 'dropped' : 'grabbed';
 
         // clean up
         this.handles
-          .filter(h => h.getAttribute('aria-pressed') === 'true')
-          .forEach(h => {
+          .filter((h) => h.getAttribute('aria-pressed') === 'true')
+          .forEach((h) => {
             h.setAttribute('aria-pressed', 'false');
             h.setAttribute('data-drag-on', 'false');
             h.classList.remove(activeClass);
@@ -192,7 +199,7 @@ export default class DragonDrop {
         handle.setAttribute('aria-pressed', `${!wasPressed}`);
         handle.setAttribute('data-drag-on', `${!wasPressed}`);
 
-        const thisItem = this.items.find(itm => {
+        const thisItem = this.items.find((itm) => {
           return itm === handle || itm.contains(handle);
         });
 
@@ -200,12 +207,14 @@ export default class DragonDrop {
         this.emit(type, this.container, thisItem);
 
         // configure classes (active and inactive)
-        this.items.forEach(it => {
+        this.items.forEach((it) => {
           const method = !wasPressed ? 'add' : 'remove';
           const isTarget = it === handle || it.contains(handle);
 
-          it.classList[(isTarget && !wasPressed) ? 'add' : 'remove'](activeClass);
-          it.classList[(isTarget && !wasPressed) ? 'remove' : method](inactiveClass);
+          it.classList[isTarget && !wasPressed ? 'add' : 'remove'](activeClass);
+          it.classList[isTarget && !wasPressed ? 'remove' : method](
+            inactiveClass
+          );
         });
 
         if (!wasPressed) {
@@ -228,9 +237,8 @@ export default class DragonDrop {
     this.container = container;
     this.setItems().initClick();
 
-
     // set all attrs/props/events on handle elements
-    this.handles.forEach(handle => {
+    this.handles.forEach((handle) => {
       handle.tabIndex = 0; // ensure it is focusable
 
       if (handle.tagName !== 'BUTTON') {
@@ -263,7 +271,9 @@ export default class DragonDrop {
     switch (which) {
       case 13:
       case 32:
-        if (nested) { e.stopPropagation(); }
+        if (nested) {
+          e.stopPropagation();
+        }
         e.preventDefault();
         target.click();
 
@@ -313,8 +323,7 @@ export default class DragonDrop {
     oldItem.parentNode.insertBefore(oldItem, refNode);
 
     target.focus();
-    this
-      .setItems()
+    this.setItems()
       .emit('reorder', this.container, oldItem)
       .announcement('reorder', oldItem);
 
@@ -339,11 +348,11 @@ export default class DragonDrop {
     const { nested } = this.options;
 
     if (!nested) {
-      this.dragula.on('drag', el => {
+      this.dragula.on('drag', (el) => {
         this.announcement('grabbed', el);
       });
 
-      this.dragula.on('drop', el => {
+      this.dragula.on('drop', (el) => {
         this.announcement('dropped', el).setItems();
       });
     }
@@ -355,14 +364,11 @@ export default class DragonDrop {
     // cache active element so it can be focused after reorder
     const focused = document.activeElement;
     // restore the order of the list
-    this.cachedItems.forEach(item => this.container.appendChild(item));
+    this.cachedItems.forEach((item) => this.container.appendChild(item));
     this.items = this.cachedItems;
     // ensure the handle stays focused
     focused.focus();
-    this
-      .announcement('cancel')
-      .emit('cancel')
-      .setItems();
+    this.announcement('cancel').emit('cancel').setItems();
 
     return this;
   }
