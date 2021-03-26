@@ -196,6 +196,22 @@ The function called when the reorder is cancelled (via ESC). No arguments passed
 () => 'Reordering cancelled'
 ```
 
+##### `liveRegion` _Object_
+
+Attributes that can be overridden in on the live region:
+
+###### `ariaLive` _string_
+
+Optional ariaLive attribute to be passed to the live region. Valid values are "off", "polite", or "assertive". Default is "assertive".
+
+###### `ariaRelevant` string
+
+Optional ariaRelevant attribute to be passed to the live region. Valid values are "additions", "removals", "text", and "all". Default is "additions".
+
+###### `ariaAtomic` boolean
+
+Optional ariaAtomic attribute to be passed to the live region. Default is "true".
+
 ## Properties
 
 ```js
