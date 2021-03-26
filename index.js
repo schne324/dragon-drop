@@ -142,7 +142,7 @@ export default class DragonDrop {
     // init live region for custom announcements
     this.liveRegion = new LiveRegion({
       ...liveOpts,
-      ...userOptions.live,
+      ...userOptions.live
     });
 
     this.onKeydown = this.onKeydown.bind(this);
