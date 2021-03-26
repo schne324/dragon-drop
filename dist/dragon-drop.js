@@ -144,6 +144,9 @@ var DragonDrop = function () {
    *                                           the live region.
    * @option {Function} announcement.cancel - The function called when the reorder is cancelled
    *                                          (via ESC). No arguments passed in.
+   * @option {string} live.ariaLive - Optional ariaLive attribute to be passed to the live region. Valid values are "off", "polite", or "assertive". Default is "assertive".
+   * @option {string} live.ariaRelevant - Optional ariaRelevant attribute to be passed to the live region. Valid values are "additions", "removals", "text", and "all". Default is "additions".
+   * @option {boolean} live.ariaAtomic - Optional ariaAtomic attribute to be passed to the live region. Default is "true".
    */
   function DragonDrop(container) {
     var _this = this;
@@ -184,12 +187,14 @@ var DragonDrop = function () {
       });
     }
 
-    // init live region for custom announcements
-    this.liveRegion = new _liveRegion2.default({
+    var liveOpts = {
       ariaLive: 'assertive',
       ariaRelevant: 'additions',
       ariaAtomic: 'true'
-    });
+    };
+
+    // init live region for custom announcements
+    this.liveRegion = new _liveRegion2.default(_extends({}, liveOpts, userOptions.live));
 
     this.onKeydown = this.onKeydown.bind(this);
 
