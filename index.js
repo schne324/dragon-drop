@@ -295,7 +295,7 @@ export default class DragonDrop {
       case 27:
         if (isDrag()) {
           target.click();
-          this.cancel();
+          this.cancel(e);
         }
     }
 
@@ -359,7 +359,7 @@ export default class DragonDrop {
     return this;
   }
 
-  cancel() {
+  cancel(e) {
     // cache active element so it can be focused after reorder
     const focused = document.activeElement;
     // restore the order of the list
@@ -369,7 +369,7 @@ export default class DragonDrop {
     focused.focus();
     this
       .announcement('cancel')
-      .emit('cancel')
+      .emit('cancel', e)
       .setItems();
 
     return this;

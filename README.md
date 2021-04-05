@@ -263,7 +263,11 @@ Fires when an item is dropped (with keyboard or mouse). The callback is passed t
 
 ### `dragonDrop.on('reorder', callback)`
 
-Fires when an list is reordered. The callback is passed the container along with the item.
+Fires when a list is reordered. The callback is passed the container along with the item.
+
+### `dragonDrop.on('cancel', callback)`
+
+Fires when a user cancels reordering with the escape key. The callback is passed the keydown event that triggered the cancel.
 
 ### Example use of events
 
@@ -272,7 +276,10 @@ dragonDrop
   .on('grabbed', (container, item) => console.log(`Item ${item.innerText} grabbed`))
   .on('dropped', (container, item) => console.log(`Item ${item.innerText} dropped`))
   .on('reorder', (container, item) => console.log(`Reorder: ${item.innerText} has moved`))
-  .on('cancel', () => console.log('Reordering cancelled'));
+  .on('cancel', (e) => {
+    console.log('Reordering cancelled');
+    e.preventDefault();
+  });
 ```
 
 **NOTE** for mouse drag/drop event hooks the `dragula` property is exposed for dragula's events
