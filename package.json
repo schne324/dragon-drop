@@ -37,7 +37,7 @@
     "debug": "^3.0.0",
     "eslint": "^4.19.1",
     "gh-pages": "^1.0.0",
-    "jsdom": "^11.2.0",
+    "jsdom": "^16.5.0",
     "jsdom-global": "^3.0.2",
     "nyc": "^11.6.0",
     "proxyquire": "^2.1.0",
